@@ -23,4 +23,4 @@ jobs:
       - name: ✨ Check Format
         # Lệnh này sẽ kiểm tra xem code có đúng chuẩn không. 
         # Nếu không đúng, nó sẽ báo lỗi (fail) để bạn biết đường mà sửa.
-        run: dotnet format TinyAI/asset/code/Main.csproj --verify-no-changes --verbosity diagnostic
+        run: dotnet format asset/code/main.csproj --verify-no-changes --verbosity diagnostic
