@@ -1,0 +1,2 @@
+# TinyAI
+My first project. 
