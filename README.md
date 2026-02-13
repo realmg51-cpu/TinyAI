@@ -49,7 +49,7 @@ Contributions are welcome! If you find bugs or have improvements:
 
 ## 📜 License
 
-This project is open source and available for educational purposes.
+MIT Lisence
 
 ## 👨‍💻 Author
 
