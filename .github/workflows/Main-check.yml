@@ -1,0 +1,31 @@
+name: "Project Checks"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: 🏗️ Build & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 📦 Restore Dependencies
+        run: dotnet restore TinyAI/asset/code/Main.csproj
+
+      - name: 🔨 Build Project
+        run: dotnet build TinyAI/asset/code/Main.csproj --configuration Release --no-restore
+
+      - name: ✅ Test (Optional)
+        # Nếu sau này bạn có file Test, lệnh này sẽ chạy chúng
+        run: dotnet test TinyAI/asset/code/Main.csproj --no-build --verbosity normal
