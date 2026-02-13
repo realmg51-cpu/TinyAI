@@ -1,0 +1,49 @@
+name: Project Checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # --- VÙNG 1: KIỂM TRA ĐỊNH DẠNG ---
+  linting:
+    name: 🧹 Lint & Auto-fix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet format
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: 🤖 tự động dọn dẹp code"
+
+  # --- VÙNG 2: KIỂM TRA BẢO MẬT ---
+  security:
+    name: 🛡️ Security Scan
+    needs: linting # Chạy sau khi lint xong cho gọn
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+
+  # --- VÙNG 3: BUILD VÀ TEST ---
+  build-test:
+    name: 🏗️ Build & Test
+    needs: linting # Đảm bảo code đẹp rồi mới phí công build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release -p:TreatWarningsAsErrors=true
+      - run: dotnet test --no-build -c Release
