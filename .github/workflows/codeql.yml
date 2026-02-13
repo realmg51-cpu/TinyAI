@@ -32,7 +32,7 @@ jobs:
       - name: 🔨 Build Project
         # CodeQL cần build thành công mới phân tích được. 
         # Chúng ta trỏ thẳng vào file csproj trong thư mục asset.
-        run: dotnet build TinyAI/asset/code/Main.csproj
+        run: dotnet build asset/code/main.csproj
 
       - name: 🚀 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
