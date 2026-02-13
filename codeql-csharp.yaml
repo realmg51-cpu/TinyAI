@@ -1,12 +1,12 @@
-name: "CodeQL"
+name: "CodeQL Daily & Push"
 
 on:
   push:
-    branches: [main]
+    branches: [main] # Chạy mỗi khi bạn push lên nhánh main
   pull_request:
-    branches: [main]
+    branches: [main] # Chạy khi tạo PR vào main
   schedule:
-    - cron: '0 0 * * 0'  # Chạy mỗi Chủ nhật
+    - cron: '0 17 * * *' # Chạy hàng ngày lúc 00:00 giờ VN (17:00 UTC) ⏰
 
 jobs:
   analyze:
@@ -14,18 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+      actions: read
+      contents: read
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Đã lên v4 cho xịn 🚀
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: 'csharp'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3 # Lên v3 luôn
+        with:
+          languages: 'csharp'
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
