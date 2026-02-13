@@ -10,20 +10,20 @@ namespace TinyAI // Define a namespace to organize the code
         {
             // Display welcome message and instructions
             Console.WriteLine("Welcome to TinyAI! Type 'exit' to exit.");
-            
+
             // Control variable for the main program loop
             bool run = true;
-            
+
             // Main loop - runs until user types 'exit'
             while (run) // Continue looping while run is true
             {
                 // Get input from user
                 Console.Write("You: \n "); // Display prompt for user input
                 string input = Console.ReadLine()?.ToLower().Trim() ?? ""; // Read user input, convert to lowercase, trim whitespace, handle null with empty string
-                
+
                 // Display prefix for AI response
                 Console.Write("AI: \n ");
-                
+
                 // Check user input
                 if (string.IsNullOrWhiteSpace(input)) // Check if input is null, empty, or whitespace (Note: string.IsNullOrExpection appears to be a typo)
                 {
