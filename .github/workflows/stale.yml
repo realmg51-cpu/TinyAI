@@ -1,0 +1,32 @@
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+    # Chạy vào 5:35 sáng hàng ngày (theo cấu hình của bạn)
+    - cron: '35 5 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9 # Cập nhật lên v9 cho mới nhất và ổn định
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Tin nhắn cho Issue bị bỏ quên
+          stale-issue-message: '🤖 AI nhận thấy Issue này đang "đóng băng" hơi lâu. Nếu không có cập nhật gì mới trong 7 ngày tới, mình xin phép đóng lại cho gọn Repo nhé! ✨'
+          
+          # Tin nhắn cho Pull Request bị bỏ quên
+          stale-pr-message: '🚀 PR này có vẻ đã bị lãng quên. Bạn hãy kiểm tra lại code nhé, nếu không AI sẽ đóng nó sau 7 ngày để giữ bảng tin sạch sẽ!'
+          
+          # Tên nhãn (Label) cho chuyên nghiệp
+          stale-issue-label: '😴 stale-issue'
+          stale-pr-label: '😴 stale-pr'
+          
+          # Cấu hình thời gian (Số ngày)
+          days-before-stale: 30  # 30 ngày không tương tác sẽ bị đánh dấu
+          days-before-close: 7   # Sau khi đánh dấu, 7 ngày sau sẽ đóng
