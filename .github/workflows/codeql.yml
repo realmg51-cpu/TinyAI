@@ -6,44 +6,35 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: '36 18 * * 3' # Chạy tự động hàng tuần
+    - cron: '36 18 * * 3'
 
 jobs:
   analyze:
-    name: Analyze (${{ matrix.language }})
-    runs-on: ubuntu-latest # Chạy trên Linux cho tiết kiệm và nhanh
+    name: Analyze (csharp)
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
-      packages: read
       actions: read
       contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - language: actions
-            build-mode: none
-          - language: csharp
-            build-mode: autobuild # Để GitHub tự tìm cách build TinyAI của bạn
+      packages: read
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: 🚚 Checkout repository
+        uses: actions/checkout@v4
 
-    - name: ⚙️ Setup .NET (Cần thiết cho CSharp)
-      if: matrix.language == 'csharp'
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3 # Hoặc v4 nếu repo của bạn đã hỗ trợ
-      with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
+      - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: 🔨 Build for Analysis
+        # Phải build thành công thì CodeQL mới phân tích được
+        run: dotnet build TinyAI/asset/code/Main.csproj
+
+      - name: 🚀 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
