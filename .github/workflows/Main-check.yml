@@ -21,11 +21,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: 📦 Restore Dependencies
-        run: dotnet restore TinyAI/asset/code/Main.csproj
+        run: dotnet restore asset/code/main.csproj
 
       - name: 🔨 Build Project
-        run: dotnet build TinyAI/asset/code/Main.csproj --configuration Release --no-restore
+        run: dotnet build asset/code/main.csproj --configuration Release --no-restore
 
       - name: ✅ Test (Optional)
         # Nếu sau này bạn có file Test, lệnh này sẽ chạy chúng
-        run: dotnet test TinyAI/asset/code/Main.csproj --no-build --verbosity normal
+        run: dotnet test asset/code/main.csproj --no-build --verbosity normal
