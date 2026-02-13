@@ -1,6 +1,6 @@
 # TinyAI
 # Description:
-This project programmed by C#. It a rule-based AI
+This project programmed by C#. It's a rule-based AI
 
 Because I'm a beginner,so it will has some bugs. You can fix it or report it on ``issue`` of this repo.
 # Requirement:
