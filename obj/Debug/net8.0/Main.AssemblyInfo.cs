@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TinyAI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e56fc127c84db81feba9ac7120966136edd6baea")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb756d1350e594f73e0cdeb7b2d9cf599a56edde")]
 [assembly: System.Reflection.AssemblyProductAttribute("TinyAI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TinyAI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
