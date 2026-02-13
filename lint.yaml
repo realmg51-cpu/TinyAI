@@ -1,19 +1,31 @@
-name: Lint
+name: Format and Auto-Fix
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-    
-    - name: Check formatting
-      run: |
-        dotnet format --verify-no-changes
-        echo "✅ Code style is correct!"
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }} # Đảm bảo checkout đúng branch của PR
+
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: 🧹 Dotnet Format
+        # Bước này sẽ sửa lỗi format trực tiếp trên các file
+        run: dotnet format
+
+      - name: 💾 Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: 🧹 tự động format code .NET (GitHub Actions)"
+          branch: ${{ github.head_ref }}
