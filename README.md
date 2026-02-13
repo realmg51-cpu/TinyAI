@@ -1,71 +1,59 @@
 # 🤖 TinyAI
-![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
+
 ![Build Status](https://github.com/realmg51-cpu/TinyAI/actions/workflows/main_check.yml/badge.svg)
 ![Security Scan](https://github.com/realmg51-cpu/TinyAI/actions/workflows/codeql.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT%20%26%20GPL%20v3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
 
-A lightweight rule-based AI system built with **C#** and **.NET** for beginners. ✨
+---
 
-## 📝 Description
+## 🇺🇸 English
 
-**TinyAI** is a rule-based artificial intelligence project programmed in **C#**. This is my first project, designed to help beginners understand AI fundamentals through practical implementation. It demonstrates how an application can process user input and respond based on predefined logic.
+### 📝 Description
+**TinyAI** is a lightweight, rule-based artificial intelligence system built with **C#** and **.NET**. This is my first project, designed to help beginners understand AI fundamentals through practical implementation.
 
-> **Note:** As a beginner project, there may be bugs. Please report them via [Issues](https://github.com/realmg51-cpu/TinyAI/issues) or feel free to submit pull requests!
+### 🚀 Getting Started
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
+   cd TinyAI
+Run the Program:
 
-## 📋 Requirements
+```bash
+cd asset/code
+dotnet run
+```
+📜 License
+This project is Dual-Licensed under MIT and GPL v3.0.
 
-- **.NET SDK**: Latest version (6.0 or higher)
-- **C#**: Latest version
-- **IDE**: [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio Community](https://visualstudio.microsoft.com/)
+🇻🇳 Tiếng Việt
+📝 Mô tả
+TinyAI là một hệ thống trí tuệ nhân tạo đơn giản dựa trên quy tắc (rule-based), được xây dựng bằng C# và .NET. Đây là dự án đầu tay của mình, nhằm giúp những người mới bắt đầu hiểu được các nguyên lý cơ bản của AI thông qua thực hành.
 
-## 🚀 Getting Started
-
-### 1. Clone the Repository
+🚀 Bắt đầu
+Sao chép dự án:
 ```bash
 git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
 cd TinyAI
 ```
-2. Open the Project
-Open the project folder in Visual Studio Code or open the .sln file in Visual Studio.
-
-Ensure all dependencies are restored automatically.
-
-3. Run the Program
+Chạy chương trình:
 ```bash
+cd asset/code
 dotnet run
 ```
-💻 Development
-You are free to:
 
-✏️ Edit the source code to learn how it works.
+🤝 Đóng góp
+Mọi đóng góp đều được trân trọng! Bạn có thể:
 
-🔧 Modify and extend the AI's "brain" with new rules.
+✏️ Chỉnh sửa mã nguồn để học tập.
 
-📤 Push improvements to your own fork.
+🔧 Mở rộng "não bộ" cho AI bằng các quy tắc mới.
 
-🐛 Report issues to help the project grow.
+🐛 Báo lỗi qua mục Issues.
 
-🤝 Contributing
-Contributions are welcome! If you find bugs or have improvements:
+📜 Bản quyền
+Dự án này sử dụng Giấy phép kép (Dual-License): MIT và GPL v3.0. Xem file LICENSE để biết thêm chi tiết.
 
-Fork the repository.
-
-Create a feature branch (git checkout -b feature/NewRule).
-
-Submit a pull request.
-
-📜 License
-This project is Dual-Licensed:
-
-MIT License: For simple and permissive use.
-
-GPL v3 License: To ensure the project stays open-source.
-See the LICENSE file for more details.
-
-👨‍💻 Author
-RealMG - First AI Project 🚀
+👨‍💻 Author: RealMG 🚀
 
 Happy Coding! 🎉
-
-
-
