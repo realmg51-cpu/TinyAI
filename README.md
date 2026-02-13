@@ -55,7 +55,6 @@ This project is open source and available for educational purposes.
 
 **RealMG** - First AI Project
 
-**Note:** I'm a C# Beginner so it will has some bugs.
 ---
 
 **Happy Coding!** 🎉
