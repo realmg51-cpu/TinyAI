@@ -1,0 +1,37 @@
+name: Build
+on: [push]
+jobs:
+  build:
+    name: 🏗️ ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet-version: ['6.0', '8.0']
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: ⚙️ Setup .NET ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      
+      - name: 🧹 Clean
+        run: dotnet clean
+      
+      - name: 📦 Restore
+        run: dotnet restore
+      
+      - name: 🔨 Build
+        run: dotnet build --no-restore --configuration Release --verbosity detailed
+      
+      - name: 🧪 Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
+      
+      - name: ⚠️ Warnings as errors
+        run: dotnet build --warnaserror
+      
+      - name: ✅ Done
+        run: echo "🎉 Build successful on ${{ matrix.os }} with .NET ${{ matrix.dotnet-version }}"
