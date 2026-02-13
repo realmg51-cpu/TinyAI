@@ -9,8 +9,13 @@ jobs:
   dependency-review:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Repository'
-        uses: actions/checkout@v3
-      
-      - name: 'Dependency Review'
-        uses: actions/dependency-review-action@v3
+      - name: '🚚 Checkout Repository'
+        uses: actions/checkout@v4 # Cập nhật lên v4 cho mới nhất
+
+      - name: '🔍 Kiểm tra Dependencies'
+        uses: actions/dependency-review-action@v4
+        with:
+          # Chỉ chặn PR nếu phát hiện lỗi bảo mật từ mức "Trung bình" trở lên
+          fail-on-severity: moderate
+          # Bạn có thể chặn luôn các loại License không mong muốn ở đây
+          # allow-licenses: MIT, Apache-2.0
