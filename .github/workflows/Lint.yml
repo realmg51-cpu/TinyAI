@@ -1,0 +1,26 @@
+name: "Lint & Format"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    name: 🧹 Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: ✨ Check Format
+        # Lệnh này sẽ kiểm tra xem code có đúng chuẩn không. 
+        # Nếu không đúng, nó sẽ báo lỗi (fail) để bạn biết đường mà sửa.
+        run: dotnet format TinyAI/asset/code/Main.csproj --verify-no-changes --verbosity diagnostic
