@@ -1,3 +1,15 @@
+# --- C# / .NET cụ thể ---
 [Bb]in/
 [Oo]bj/
+
+# --- File của Visual Studio / VS Code ---
 .vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- File rác hệ điều hành ---
+.DS_Store
+Thumbs.db
