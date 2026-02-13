@@ -48,8 +48,9 @@ Contributions are welcome! If you find bugs or have improvements:
 3. Submit a pull request
 
 ## 📜 License
+![License](https://img.shields.io/badge/license-MIT%20%26%20GPL-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
 
-MIT Lisence
 
 ## 👨‍💻 Author
 
