@@ -1,6 +1,4 @@
 # 🤖 TinyAI
-
-![Build Status](https://github.com/realmg51-cpu/TinyAI/actions/workflows/main_check.yml/badge.svg)
 ![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
 
 A lightweight rule-based AI system built with **C#** and **.NET** for beginners. ✨
