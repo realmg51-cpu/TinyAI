@@ -1,60 +1,45 @@
-using System; // Import the System namespace for basic functionality like Console
+using System;
 
-namespace TinyAI // Define a namespace to organize the code
+namespace TinyAI 
 {
-    // Program class containing the entry point of the application
-    class Program // Declare the main class
+    class Program 
     {
-        // Main method - entry point of the program
-        static void Main() // Declare the main method where program execution begins
+        static void Main() 
         {
-            // Display welcome message and instructions
-            Console.WriteLine("Welcome to TinyAI! Type 'exit' to exit.");
+            // Support for Emojis in some consoles
+            Console.OutputEncoding = System.Text.Encoding.UTF8; 
+            Console.WriteLine("✨ Welcome to TinyAI! Type 'exit' to say goodbye. ✨");
 
-            // Control variable for the main program loop
-            bool run = true;
+            bool isRunning = true;
 
-            // Main loop - runs until user types 'exit'
-            while (run) // Continue looping while run is true
+            while (isRunning) 
             {
-                // Get input from user
-                Console.Write("You: \n "); // Display prompt for user input
-                string input = Console.ReadLine()?.ToLower().Trim() ?? ""; // Read user input, convert to lowercase, trim whitespace, handle null with empty string
+                // Coloring the prompt for a cooler look! 🎨
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("\nYou: ");
+                Console.ResetColor();
 
-                // Display prefix for AI response
-                Console.Write("AI: \n ");
+                string input = Console.ReadLine()?.ToLower().Trim() ?? "";
 
-                // Check user input
-                if (string.IsNullOrWhiteSpace(input)) // Check if input is null, empty, or whitespace (Note: string.IsNullOrExpection appears to be a typo)
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("AI: ");
+                Console.ResetColor();
+
+                // Using Modern Pattern Matching for cleaner code
+                string response = input switch
                 {
-                    // Case:  empty input or only whitespace
-                    Console.WriteLine("Please talk anything!!");
-                }
-                else if (input == "exit") // Check if user wants to exit
-                {
-                    // Exit the program
-                    Console.WriteLine("Bye~");
-                    run = false; // End loop,  exit program
-                }
-                else if (input.Contains("hi") || input.Contains("hello")) // Check if input contains greeting words
-                {
-                    // Respond when user greets
-                    Console.WriteLine("Hi there!! Nice to meet you!");
-                }
-                else if (input.Contains("hey")) // Check if input contains "hey"
-                {
-                    // Response while input contains 'hey'
-                    Console.WriteLine("Yo! What's up? How can I help you?");
-                }
-                else if (input.Contains("hmm")) // Check if input contains "hmm"
-                {
-                    Console.WriteLine("Hmm... What are you thinking for?");
-                }
-                else // Handle all other cases
-                {
-                    // Case:  don't understand the question
-                    Console.WriteLine("Sorry! I don't know...");
-                }
+                    "" => "Don't be so quiet, talk to me! 😶",
+                    "exit" => "Goodbye! I'm going to take a nap now~ 😴",
+                    var s when s.Contains("hi") || s.Contains("hello") => "Hi there!! Nice to meet you! 👋",
+                    var s when s.Contains("hey") => "Yo! What's up? How can I help you? 😎",
+                    var s when s.Contains("hmm") => "Hmm... Thinking hard? Need me to think for you? 🤔",
+                    var s when s.Contains("stupid") => "I'm not stupid, I'm just saving my energy! 🧠⚡",
+                    _ => "Too hard for me... I haven't learned that part yet! 😅"
+                };
+
+                Console.WriteLine(response);
+
+                if (input == "exit") isRunning = false;
             }
         }
     }
