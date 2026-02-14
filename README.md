@@ -23,9 +23,22 @@ Run the Program:
 cd asset/code
 dotnet run
 ```
-### 📜 License
+# 🤝 Contributing
+Every contribution is highly appreciated! You can help by:
 
-This project using GPL-v3.0 License.
+✏️ Refactoring the source code for learning purposes.
+
+🔧 Expanding the AI's "brain" with new rules and logic.
+
+🐛 Reporting bugs or suggesting features via [Issues](.../.../.../issues)
+
+### 📜 License
+This project is licensed under the GPL-3.0 License.
+
+👨‍💻 Author: RealMG 🚀
+
+Happy Coding! 🎉
+
 
 ## Checklist ##
 
@@ -81,14 +94,14 @@ cd asset/code
 dotnet run
 ```
 
-🤝 Đóng góp
+# 🤝 Đóng góp
 Mọi đóng góp đều được trân trọng! Bạn có thể:
 
 ✏️ Chỉnh sửa mã nguồn để học tập.
 
 🔧 Mở rộng "não bộ" cho AI bằng các quy tắc mới.
 
-🐛 Báo lỗi qua mục Issues.
+🐛 Báo lỗi qua mục [Issues](https://github.com/realmg51-cpu/TinyAI/issues)
 
 ### 📜 Bản quyền
 
