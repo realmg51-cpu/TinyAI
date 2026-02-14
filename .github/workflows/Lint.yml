@@ -1,4 +1,4 @@
-name: "Lint & Format"
+name: 🧹 Lint & Format
 
 on:
   push:
@@ -6,11 +6,15 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Thiết lập quyền hạn ở mức toàn cục để bảo mật tối đa
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: 🧹 Lint Code
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: 🚚 Checkout code
         uses: actions/checkout@v4
@@ -21,6 +25,6 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: ✨ Check Format
-        # Lệnh này sẽ kiểm tra xem code có đúng chuẩn không. 
-        # Nếu không đúng, nó sẽ báo lỗi (fail) để bạn biết đường mà sửa.
-        run: dotnet format asset/code/main.csproj --verify-no-changes --verbosity diagnostic
+        # Lệnh này kiểm tra xem code có đúng chuẩn không.
+        # --verify-no-changes: Nếu code chưa format thì sẽ báo lỗi ngay (fail build).
+        run: dotnet format TinyAI/asset/code/main.csproj --verify-no-changes --verbosity diagnostic
