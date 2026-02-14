@@ -1,0 +1,29 @@
+name: 📥 Auto Backup Project
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'asset/code/**' # Chỉ backup khi có thay đổi trong code
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: 🛡️ Create Source Backup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Archive Source Code
+        uses: actions/upload-artifact@v4
+        with:
+          # Tên bản backup kèm theo mã định danh (Run ID)
+          name: TinyAI-Backup-Run-${{ github.run_number }}
+          # Đường dẫn thư mục muốn backup
+          path: asset/code/
+          # Thời gian lưu trữ (ví dụ 7 ngày cho đỡ tốn bộ nhớ)
+          retention-days: 7
