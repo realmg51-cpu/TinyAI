@@ -10,8 +10,17 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+   # ... (Phần on và permissions giống hệt bên trên) ...
+
     steps:
-      - name: 'Checkout Repository'
+      - name: 🚚 Checkout code
         uses: actions/checkout@v4
-      - name: 'Dependency Review'
-        uses: actions/dependency-review-action@v4
+        
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 🔍 Check Outdated Packages
+        # Quét mọi project có trong folder code
+        run: dotnet list asset/code/*.csproj package --outdated 
