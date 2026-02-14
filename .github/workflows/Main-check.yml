@@ -4,13 +4,10 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - '**.cs'
-      - '**.csproj'
+      - 'asset/code/*.cs'
+      - 'asset/code/*.csproj'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - '**.cs'
-      - '**.csproj'
 
 permissions:
   contents: read
@@ -30,9 +27,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: 🛠️ Restore dependencies
-        # Sử dụng *.csproj để tự động khớp với main.csproj hoặc TinyAI.csproj
-        run: dotnet restore asset/code/*.csproj
+        run: dotnet restore asset/code/main.csproj
 
       - name: 🏗️ Build Project
-        # Build chế độ Release để kiểm tra lỗi logic và cú pháp
-        run: dotnet build asset/code/*.csproj --no-restore --configuration Release
+        run: dotnet build asset/code/main.csproj --no-restore --configuration Release
