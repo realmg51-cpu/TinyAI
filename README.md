@@ -26,12 +26,14 @@ dotnet run
 📜 License
 This project is Dual-Licensed under MIT and GPL v3.0.
 
-🇻🇳 Tiếng Việt
-📝 Mô tả
+## 🇻🇳 Tiếng Việt
+
+### 📝 Mô tả
+
 TinyAI là một hệ thống trí tuệ nhân tạo đơn giản dựa trên quy tắc (rule-based), được xây dựng bằng C# và .NET. Đây là dự án đầu tay của mình, nhằm giúp những người mới bắt đầu hiểu được các nguyên lý cơ bản của AI thông qua thực hành.
 
-🚀 Bắt đầu
-Sao chép dự án:
+ ### 🚀 Bắt đầu
+**Sao chép dự án:**
 ```bash
 git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
 cd TinyAI
