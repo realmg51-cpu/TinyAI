@@ -28,6 +28,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: csharp # Chỉ quét C#, bỏ qua các thứ khác 🎯
+          build-mode: none
 
       - name: 🔨 Build Project
         # CodeQL cần build thành công mới phân tích được. 
