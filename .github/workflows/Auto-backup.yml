@@ -1,48 +1,54 @@
-name: 📂 Local File Backup
+name: 📂 Versioned Local Backup
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - 'asset/code/**'
-      # Tránh vòng lặp vô tận: Không chạy backup khi chính thư mục Backup thay đổi
-      - '!asset/code/Backup/**'
+      - 'asset/code/*.cs'
+      - 'asset/code/*.csproj'
 
 permissions:
-  contents: write # Cần quyền ghi để Push bản backup lên Repo
+  contents: write
 
 jobs:
-  create-backup:
-    name: 💾 Sync Backup Folder
+  create-versioned-backup:
+    name: 💾 Create Timed Backup Folder
     runs-on: ubuntu-latest
     
     steps:
       - name: 🚚 Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử để commit không bị lỗi
+          fetch-depth: 0
 
-      - name: 🧹 Clean and Sync Backup
+      - name: 🛠️ Generate Backup
         run: |
-          # Tạo thư mục Backup nếu chưa có
-          mkdir -p asset/code/Backup/
+          # 1. Tạo tên thư mục dựa trên thời gian (VD: 2026-02-14_18-30)
+          # Sử dụng múi giờ Việt Nam (UTC+7) cho thân thiện
+          TIMESTAMP=$(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d_%H-%M')
+          BACKUP_PATH="asset/code/Backup/$TIMESTAMP"
           
-          # Copy toàn bộ file .cs và .csproj vào thư mục Backup
-          # (Loại trừ chính thư mục Backup để tránh lồng nhau)
-          cp asset/code/*.cs asset/code/Backup/ 2>/dev/null || true
-          cp asset/code/*.csproj asset/code/Backup/ 2>/dev/null || true
+          echo "Creating backup at $BACKUP_PATH"
+          mkdir -p "$BACKUP_PATH"
           
-      - name: 🚀 Commit & Push Backup
+          # 2. Copy file code vào thư mục vừa tạo
+          # Đổi đuôi thành .bak để các bot khác (Lint/Build) không quét nhầm
+          cp asset/code/main.cs "$BACKUP_PATH/main.cs.bak"
+          cp asset/code/main.csproj "$BACKUP_PATH/main.csproj.bak"
+          
+          # 3. Ghi chú lại commit SHA để biết bản backup này từ đâu ra
+          echo "Backup from commit: ${{ github.sha }}" > "$BACKUP_PATH/info.txt"
+
+      - name: 🚀 Commit & Push Backup Folder
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           git add asset/code/Backup/
           
-          # Chỉ commit nếu có sự thay đổi
           if git diff --staged --quiet; then
-            echo "No changes in code, skipping backup."
+            echo "No changes to backup."
           else
-            git commit -m "backup: 🤖 tự động sao lưu code dự án [$(date +'%Y-%m-%d %H:%M')]"
+            git commit -m "archive: 🗄️ New backup version [$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M')]"
             git push
           fi
