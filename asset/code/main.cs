@@ -33,8 +33,8 @@ namespace TinyAI
                     var s when s.Contains("hi") || s.Contains("hello") => "Hi there!! Nice to meet you! 👋",
                     var s when s.Contains("hey") => "Yo! What's up? How can I help you? 😎",
                     var s when s.Contains("hmm") => "Hmm... Thinking hard? Need me to think for you? 🤔",
-                    var s when s.Contains("stupid") => "I'm not stupid, I'm just saving my energy! 🧠cod
-                    _ => "Too hard for me... I haven't learned that part yet! 😅"
+                    var s when s.Contains("stupid") => "I'm not stupid, I'm just saving my energy! ",
+                    _ => "Too hard for me... I haven't learned that part yet! 😅",
                 };
 
                 Console.WriteLine(response);
