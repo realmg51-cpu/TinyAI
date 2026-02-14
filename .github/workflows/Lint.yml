@@ -4,13 +4,10 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - '**.cs'
-      - '**.csproj'
+      - 'asset/code/*.cs'
+      - 'asset/code/*.csproj'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - '**.cs'
-      - '**.csproj'
 
 permissions:
   contents: read
@@ -30,5 +27,5 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: ✨ Check Format
-        # Tự động tìm file .csproj để format mà không cần chỉ định tên chính xác
-        run: dotnet format asset/code/*.csproj --verify-no-changes --verbosity diagnostic
+        # Trỏ thẳng vào main.csproj để không bị lẫn với file trong thư mục Backup
+        run: dotnet format asset/code/main.csproj --verify-no-changes --verbosity diagnostic
