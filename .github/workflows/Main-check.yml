@@ -3,12 +3,22 @@ name: "Project Checks"
 on:
   push:
     branches: [ "main" ]
+    # Chỉ "thức dậy" khi có thay đổi trong file code
+    paths:
+      - '**.cs'
+      - '**.csproj'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.cs'
+      - '**.csproj'
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: 🏗️ Build & Verify
+    name: "🔨 Build & Test"
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +30,9 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: 📦 Restore Dependencies
-        run: dotnet restore asset/code/main.csproj
+      - name: 🛠️ Restore dependencies
+        run: dotnet restore TinyAI/asset/code/main.csproj
 
-      - name: 🔨 Build Project
-        run: dotnet build asset/code/main.csproj --configuration Release --no-restore
-
-      - name: ✅ Test (Optional)
-        # Nếu sau này bạn có file Test, lệnh này sẽ chạy chúng
-        run: dotnet test asset/code/main.csproj --no-build --verbosity normal
+      - name: 🏗️ Build Project
+        # Kiểm tra xem code có compile được không
+        run: dotnet build TinyAI/asset/code/main.csproj --no-restore --configuration Release
