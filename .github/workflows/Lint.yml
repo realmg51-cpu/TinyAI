@@ -3,10 +3,16 @@ name: 🧹 Lint & Format
 on:
   push:
     branches: [ "main" ]
+    # Chỉ chạy khi các file sau thay đổi:
+    paths:
+      - '**.cs'
+      - '**.csproj'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.cs'
+      - '**.csproj'
 
-# Thiết lập quyền hạn ở mức toàn cục để bảo mật tối đa
 permissions:
   contents: read
 
@@ -25,6 +31,5 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: ✨ Check Format
-        # Lệnh này kiểm tra xem code có đúng chuẩn không.
-        # --verify-no-changes: Nếu code chưa format thì sẽ báo lỗi ngay (fail build).
+        # Con Bot bây giờ chỉ soi đúng file project của bạn
         run: dotnet format TinyAI/asset/code/main.csproj --verify-no-changes --verbosity diagnostic
