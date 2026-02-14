@@ -3,7 +3,6 @@ name: 🧹 Lint & Format
 on:
   push:
     branches: [ "main" ]
-    # Chỉ chạy khi các file sau thay đổi:
     paths:
       - '**.cs'
       - '**.csproj'
@@ -31,5 +30,5 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: ✨ Check Format
-        # Con Bot bây giờ chỉ soi đúng file project của bạn
-        run: dotnet format TinyAI/asset/code/main.csproj --verify-no-changes --verbosity diagnostic
+        # Tự động tìm file .csproj để format mà không cần chỉ định tên chính xác
+        run: dotnet format asset/code/*.csproj --verify-no-changes --verbosity diagnostic
