@@ -3,7 +3,6 @@ name: "Project Checks"
 on:
   push:
     branches: [ "main" ]
-    # Chỉ "thức dậy" khi có thay đổi trong file code
     paths:
       - '**.cs'
       - '**.csproj'
@@ -31,8 +30,9 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: 🛠️ Restore dependencies
-        run: dotnet restore TinyAI/asset/code/main.csproj
+        # Sử dụng *.csproj để tự động khớp với main.csproj hoặc TinyAI.csproj
+        run: dotnet restore asset/code/*.csproj
 
       - name: 🏗️ Build Project
-        # Kiểm tra xem code có compile được không
-        run: dotnet build TinyAI/asset/code/main.csproj --no-restore --configuration Release
+        # Build chế độ Release để kiểm tra lỗi logic và cú pháp
+        run: dotnet build asset/code/*.csproj --no-restore --configuration Release
