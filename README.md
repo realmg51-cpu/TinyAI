@@ -27,6 +27,42 @@ dotnet run
 
 This project using GPL-v3.0 License.
 
+## Checklist ##
+
+✅ Phase 1: The Foundation (v1.0.0 - v1.1.0)
+
+[x] Khởi tạo dự án C# Console đơn giản. 🛠️
+
+[x] Xử lý đầu vào: Thêm ToLower() và Trim() để tránh lỗi khoảng trắng. ✨
+
+[x] Cấu trúc logic cơ bản với if-else.
+
+🚀 Phase 2: The Personality Update (v1.2.0 - Hotfix)
+[x] Modern Code: Chuyển đổi sang Switch Expressions cho sạch sẽ. 🧼
+
+[x] Colorful UI: Phân biệt người dùng và AI bằng màu sắc (Cyan/Green). 🎨
+
+[x] Emoji Support: Tích hợp cảm xúc vào phản hồi. 🐧
+
+[x] CI/CD Workflows:
+
+[x] Tự động Build & Test khi Push. 🔨
+
+[x] Tự động kiểm tra Format code (Lint). 🧹
+
+[x] Local Backup System: Tự động sao lưu code theo từng phiên bản thời gian. 📂🛡️
+
+[x] Hotfix-1: Sửa lỗi cú pháp dòng 36 (Huyền thoại! 😂). ✅
+
+🏗️ Phase 3: Future Goals (v1.3.0+)
+[ ] Math Skills: Thêm khả năng tính toán cộng trừ nhân chia cơ bản. ➕➖
+
+[ ] Memory: Lưu tên người dùng trong suốt phiên làm việc. 🤔
+
+[ ] Random Facts: Cung cấp thông tin thú vị ngẫu nhiên. 💡
+
+[ ] Voice Support? (Maybe far future...) 🎤
+
 ## 🇻🇳 Tiếng Việt
 
 ### 📝 Mô tả
