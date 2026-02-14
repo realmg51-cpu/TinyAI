@@ -1,29 +1,48 @@
-name: 📥 Auto Backup Project
+name: 📂 Local File Backup
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - 'asset/code/**' # Chỉ backup khi có thay đổi trong code
+      - 'asset/code/**'
+      # Tránh vòng lặp vô tận: Không chạy backup khi chính thư mục Backup thay đổi
+      - '!asset/code/Backup/**'
 
 permissions:
-  contents: read
+  contents: write # Cần quyền ghi để Push bản backup lên Repo
 
 jobs:
-  backup:
-    name: 🛡️ Create Source Backup
+  create-backup:
+    name: 💾 Sync Backup Folder
     runs-on: ubuntu-latest
     
     steps:
       - name: 🚚 Checkout code
         uses: actions/checkout@v4
-
-      - name: 📦 Archive Source Code
-        uses: actions/upload-artifact@v4
         with:
-          # Tên bản backup kèm theo mã định danh (Run ID)
-          name: TinyAI-Backup-Run-${{ github.run_number }}
-          # Đường dẫn thư mục muốn backup
-          path: asset/code/
-          # Thời gian lưu trữ (ví dụ 7 ngày cho đỡ tốn bộ nhớ)
-          retention-days: 7
+          fetch-depth: 0 # Lấy toàn bộ lịch sử để commit không bị lỗi
+
+      - name: 🧹 Clean and Sync Backup
+        run: |
+          # Tạo thư mục Backup nếu chưa có
+          mkdir -p asset/code/Backup/
+          
+          # Copy toàn bộ file .cs và .csproj vào thư mục Backup
+          # (Loại trừ chính thư mục Backup để tránh lồng nhau)
+          cp asset/code/*.cs asset/code/Backup/ 2>/dev/null || true
+          cp asset/code/*.csproj asset/code/Backup/ 2>/dev/null || true
+          
+      - name: 🚀 Commit & Push Backup
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add asset/code/Backup/
+          
+          # Chỉ commit nếu có sự thay đổi
+          if git diff --staged --quiet; then
+            echo "No changes in code, skipping backup."
+          else
+            git commit -m "backup: 🤖 tự động sao lưu code dự án [$(date +'%Y-%m-%d %H:%M')]"
+            git push
+          fi
