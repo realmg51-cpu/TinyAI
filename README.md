@@ -23,8 +23,9 @@ Run the Program:
 cd asset/code
 dotnet run
 ```
-📜 License
-This project is Dual-Licensed under MIT and GPL v3.0.
+###📜 License
+
+This project using GPL-v3.0 License.
 
 ## 🇻🇳 Tiếng Việt
 
@@ -53,8 +54,9 @@ Mọi đóng góp đều được trân trọng! Bạn có thể:
 
 🐛 Báo lỗi qua mục Issues.
 
-📜 Bản quyền
-Dự án này sử dụng Giấy phép kép (Dual-License): MIT và GPL v3.0. Xem file LICENSE để biết thêm chi tiết.
+### 📜 Bản quyền
+
+Dự án sử dụng GPL-v3.0 license.
 
 👨‍💻 Author: RealMG 🚀
 
