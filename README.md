@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/realmg51-cpu/TinyAI/actions/workflows/main_check.yml/badge.svg)
 ![Security Scan](https://github.com/realmg51-cpu/TinyAI/actions/workflows/codeql.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-GPL%20v3.0-blue.svg)
-![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-green.svg)
 
 ---
 
