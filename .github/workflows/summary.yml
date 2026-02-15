@@ -24,7 +24,7 @@ jobs:
         uses: actions/ai-inference@v1
         with:
           # Bạn có thể chọn model khác như 'gpt-4o' hoặc 'phi-3-mini' tùy quyền truy cập
-          model: gpt-4o 
+          model: gemini-2.5 
           prompt: |
             Bạn là một trợ lý ảo chuyên nghiệp. Hãy tóm tắt Issue sau đây trong một đoạn văn ngắn gọn (khoảng 2-3 câu).
             Hãy nêu rõ mục đích chính và yêu cầu của người dùng.
