@@ -71,7 +71,7 @@ Happy Coding! 🎉
 
 - [ ] Memory: Lưu tên người dùng trong suốt phiên làm việc. 🤔
 
-- [ ] Random Facts: Cung cấp thông tin thú vị ngẫu nhiên. 💡
+- [x] Random Facts: Cung cấp thông tin thú vị ngẫu nhiên. 💡
 
 - [ ] Voice Support? (Maybe far future...) 🎤
 
