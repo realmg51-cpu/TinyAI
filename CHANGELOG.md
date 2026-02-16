@@ -1,15 +1,15 @@
-**1.0.0:**
+## 1.0.0:
 
    - First  version of TinyAI.
 
-  1.1.0:
+##  1.1.0:
 
 ## ✨ New Features
 
   - More intelligent.
   - At `Console.ReadLine()`,Add `ToLower()` and `Trim()` to understand lowercase and remove unwanted space.
 
-**1.2.0:** 
+## 1.2.0: 
 
 ## ✨ New Features
    - Rewrite code.
@@ -20,10 +20,12 @@
 
 - Emojis: Tossed in some personality to keep it fun! 🐧
 
-**1.2.1:**
+## 1.2.1:
 
 - Fix syntax errors. I'm sorry...
-**1.3.0:**
+
+  ## 1.3.0:
+  
 ## ✨ New Features
 
 - Typing Animation: Added typewriter effect during system initialization for a more dynamic startup experience
@@ -59,3 +61,35 @@
 **1.3.1:**
 
   - A few minor tweaks to optimize the code.
+  
+   ## 1.4.0:
+
+  ## User Identity Management:
+
+- Added an initialization sequence to ask for the user's name at startup. 👤
+
+- Integrated personalized responses across all dialogue modules (Greetings, Mood, Exit).
+
+- Improved the AI's "memory" by using the stored userName throughout the session.
+
+- Integrated Math Engine:
+
+- Implemented an automated Math Detection system using Regex (Regular Expressions). 🧮
+
+- Added support for basic and complex arithmetic expressions (e.g., (10 + 5) * 2).
+
+- Powered by System.Data for high-accuracy string-to-math evaluation.
+
+- Included error handling for "tangled" (invalid) mathematical expressions. 😵‍💫
+
+##Improvements & Tweaks
+- Dynamic UI: The console prompt now displays your name instead of a generic "You" (e.g., John: ).
+
+- Optimized Typewriter Effect: Adjusted the delay for a smoother "human-like" typing feel. ⌨️
+
+- Enhanced Logic: Refined the switch expression to prioritize math calculations before falling back to default responses.
+
+## Bug Fixes
+- Fixed a bug where empty inputs would sometimes trigger a generic error.
+
+- Added better null-check handling for user inputs to prevent crashes.
