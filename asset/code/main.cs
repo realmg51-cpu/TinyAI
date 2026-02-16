@@ -1,68 +1,71 @@
 using System;
 using System.Threading;
+using System.Data; // Cần thiết để tính toán chuỗi toán học
 
-namespace TinyAI 
+namespace TinyAI
 {
-    class Program 
+    class Program
     {
-        static void Main() 
+        static void Main()
         {
-            // Hỗ trợ hiển thị Emoji trên Console
-            Console.OutputEncoding = System.Text.Encoding.UTF8; 
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            // Thông báo chào mừng
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("✨ Welcome to TinyAI v1.3.0! Type 'exit' to say goodbye. ✨");
+            Console.WriteLine("✨ Welcome to TinyAI v1.4.0! Type 'exit' to say goodbye. ✨");
             Console.ResetColor();
 
-            // Hiệu ứng khởi tạo hệ thống
-            TypeWriter("Initializing AI system", 50);
+            TypeWriter("Initializing AI system", 40);
             Console.WriteLine(" ✅");
-            Thread.Sleep(500);
+
+            // --- TÍNH NĂNG MỚI: LƯU TÊN USER ---
+            Console.Write("AI: Before we start, what's your name? 😊 ");
+            string userName = Console.ReadLine()?.Trim() ?? "Friend";
+            if (string.IsNullOrEmpty(userName)) userName = "Friend";
+            
+            Console.WriteLine($"AI: Nice to meet you, {userName}! How can I help you today? ✨");
+            // ----------------------------------
 
             bool isRunning = true;
             int conversationCount = 0;
 
-            while (isRunning) 
+            while (isRunning)
             {
-                // Hiển thị prompt "You" với màu Cyan
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("\nYou: ");
+                Console.Write($"\n{userName}: ");
                 Console.ResetColor();
 
                 string input = Console.ReadLine()?.ToLower().Trim() ?? "";
 
-                // Hiển thị prompt "AI" với màu Green
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("AI: ");
                 Console.ResetColor();
 
-                // Hiệu ứng "đang suy nghĩ" nếu câu hỏi dài
                 if (input.Length > 10)
                 {
                     Console.Write("🤔");
-                    Thread.Sleep(600);
-                    Console.Write("\b \b"); // Xóa emoji suy nghĩ
+                    Thread.Sleep(500);
+                    Console.Write("\b \b");
                 }
 
-                // Logic xử lý phản hồi bằng Switch Expression (Modern C#)
+                // Logic xử lý phản hồi
                 string response = input switch
                 {
                     "" => "Don't be so quiet, talk to me! 😶",
-                    "exit" => HandleExit(ref isRunning, conversationCount),
-                    var s when s.Contains("hi") || s.Contains("hello") => "Hi there!! Nice to meet you! 👋",
-                    var s when s.Contains("hey") => "Yo! What's up? How can I help you? 😎",
-                    var s when s.Contains("hmm") => "Hmm... Thinking hard? Need me to think for you? 🤔",
-                    var s when s.Contains("stupid") => "I'm not stupid, I'm just saving my energy! 🧠",
+                    "exit" => HandleExit(ref isRunning, conversationCount, userName),
+                    var s when s.Contains("hi") || s.Contains("hello") => $"Hi {userName}!! Nice to meet you! 👋",
+                    var s when s.Contains("hey") => $"Yo {userName}! What's up? How can I help? 😎",
+                    
+                    // --- TÍNH NĂNG MỚI: TÍNH TOÁN ---
+                    var s when IsMathExpression(s) => Calculate(s),
+                    
                     var s when s.Contains("lunar new year") || s.Contains("tết") => GetLunarNewYearResponse(),
-                    var s when s.Contains("how are you") => GetMoodResponse(conversationCount),
-                    var s when s.Contains("weather") => "I can't check weather yet, but I hope it's sunny where you are! ☀️",
+                    var s when s.Contains("how are you") => GetMoodResponse(conversationCount, userName),
+                    var s when s.Contains("weather") => "I can't check weather yet, but I hope it's sunny! ☀️",
                     var s when s.Contains("joke") => GetRandomJoke(),
-                    var s when s.Contains("love") => "Aww, I love you too! ❤️ (in a friendly AI way!)",
-                    var s when s.Contains("thank") => "You're welcome! That's what I'm here for! 😊",
+                    var s when s.Contains("thank") => $"You're welcome, {userName}! Anytime! 😊",
                     var s when s.Contains("help") => GetHelpMessage(),
                     var s when s.Contains("who are you") => "I'm TinyAI, your friendly neighborhood chatbot! 🤖",
-                    _ => "Too hard for me... I haven't learned that part yet! 😅",
+                    _ => $"Hmm, '{input}' is a bit hard for me... I'm still learning! 😅",
                 };
 
                 Console.WriteLine(response);
@@ -70,70 +73,73 @@ namespace TinyAI
             }
         }
 
-        // Xử lý khi thoát chương trình
-        static string HandleExit(ref bool isRunning, int conversationCount)
+        // Kiểm tra xem input có phải là phép tính không (đơn giản)
+        static bool IsMathExpression(string input)
         {
-            isRunning = false;
-            if (conversationCount > 5)
-            {
-                return $"Goodbye! We had {conversationCount} nice conversations! I'm going to take a nap now~ 😴";
-            }
-            return "Goodbye! I'm going to take a nap now~ 😴";
+            // Kiểm tra xem chuỗi có chứa số và các dấu toán học cơ bản không
+            return System.Text.RegularExpressions.Regex.IsMatch(input, @"^[0-9\+\-\*\/\.\s\(\)]+$") 
+                   && System.Text.RegularExpressions.Regex.IsMatch(input, @"[0-9]");
         }
 
-        // Phản hồi chúc Tết ngẫu nhiên
+        // Thực hiện tính toán
+        static string Calculate(string expression)
+        {
+            try
+            {
+                // Sử dụng DataTable để tính toán chuỗi toán học nhanh gọn
+                var table = new DataTable();
+                var result = table.Compute(expression, string.Empty);
+                return $"The result of '{expression}' is: {result} 🧮";
+            }
+            catch
+            {
+                return "I tried to calculate that, but the numbers got tangled! 😵‍💫";
+            }
+        }
+
+        static string HandleExit(ref bool isRunning, int conversationCount, string name)
+        {
+            isRunning = false;
+            return conversationCount > 5 
+                ? $"Goodbye {name}! We had {conversationCount} great chats! Zzz... 😴" 
+                : $"Bye {name}! See you later! 😴";
+        }
+
         static string GetLunarNewYearResponse()
         {
             string[] responses = {
-                "Happy Lunar New Year! 🧧 May the Year of the Dragon bring you prosperity! 🐉",
-                "Chúc mừng năm mới! Happy Lunar New Year to our Vietnamese friends! 🎋",
-                "恭喜发财! Wishing you good fortune in the Lunar New Year! 🧨",
-                "Tết đến rồi! Chúc bạn năm mới an khang thịnh vượng! 🎊"
+                "Happy Lunar New Year! 🧧 May the Dragon bring you luck! 🐉",
+                "Chúc mừng năm mới! An khang thịnh vượng! 🎋",
+                "Tết đến rồi! Chúc bạn nhận được nhiều lì xì nhé! 🧧"
             };
-
-            Random rand = new Random();
-            return responses[rand.Next(responses.Length)];
+            return responses[new Random().Next(responses.Length)];
         }
 
-        // Hệ thống cảm xúc dựa trên độ dài hội thoại
-        static string GetMoodResponse(int conversationCount)
+        static string GetMoodResponse(int count, string name)
         {
-            if (conversationCount < 3)
-                return "I'm doing great! Thanks for asking! 🤗";
-            else if (conversationCount < 10)
-                return "Still energized and ready to chat! ⚡";
-            else
-                return "A bit tired but happy to keep talking with you! 💫";
+            if (count < 3) return $"I'm feeling awesome, {name}! Thanks for asking! 🤗";
+            return $"A bit busy thinking, but always happy to chat with you, {name}! ⚡";
         }
 
-        // Kho tàng truyện cười
         static string GetRandomJoke()
         {
             string[] jokes = {
                 "Why don't scientists trust atoms? Because they make up everything! 😄",
                 "What do you call a fake noodle? An impasta! 🍝",
-                "Why did the scarecrow win an award? Because he was outstanding in his field! 🌾",
-                "What do you call a bear with no teeth? A gummy bear! 🐻",
-                "Why don't eggs tell jokes? They'd crack each other up! 🥚"
+                "What do you call a bear with no teeth? A gummy bear! 🐻"
             };
-
-            Random rand = new Random();
-            return jokes[rand.Next(jokes.Length)];
+            return jokes[new Random().Next(jokes.Length)];
         }
 
-        // Menu trợ giúp (Sử dụng nối chuỗi để tránh lỗi build trên Linux)
         static string GetHelpMessage()
         {
-            return "I can respond to:\n" +
-                   "• Greetings (hi, hello, hey)\n" +
-                   "• Questions about Lunar New Year/Tết\n" +
-                   "• Jokes (just say 'joke')\n" +
-                   "• How I'm feeling (how are you)\n" +
-                   "• Identity (who are you)\n" +
-                   "• And more! Try asking me things! 🎯";
+            return "I can help with:\n" +
+                   "• Math: Just type something like '5 * 5 + 10'\n" +
+                   "• Fun: Jokes, Tết greetings, How are you\n" +
+                   "• Basics: Hello, Who are you, Help\n" +
+                   "• Exit: Type 'exit' to quit. 🎯";
         }
 
-        // Hiệu ứng đánh máy
         static void TypeWriter(string message, int delay)
         {
             foreach (char c in message)
