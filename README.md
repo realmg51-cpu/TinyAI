@@ -4,8 +4,7 @@
 ![Security Scan](https://github.com/realmg51-cpu/TinyAI/actions/workflows/codeql.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-GPL%20v3.0-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.3.1-green.svg)
-
----
+![Github](https://img.shields.io/badge/realmg51--cpu-Official-repo--blue?logo=)
 
 ## 🇺🇸 English
 
