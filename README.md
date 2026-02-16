@@ -69,13 +69,15 @@ Happy Coding! 🎉
 
 
 🏗️ Phase 3: Future Goals (v1.3.0+)
-- [ ] Math Skills: Thêm khả năng tính toán cộng trừ nhân chia cơ bản. ➕➖
 
-- [ ] Memory: Lưu tên người dùng trong suốt phiên làm việc. 🤔
+- [] Math Skills: Thêm khả năng tính toán cộng trừ nhân chia cơ bản. ➕➖
+
+- [x] Memory: Lưu tên người dùng trong suốt phiên làm việc. 🤔
 
 - [x] Random Facts: Cung cấp thông tin thú vị ngẫu nhiên. 💡
 
 - [ ] Voice Support? (Maybe far future...) 🎤
+- [ ] More!
 
 ## 🇻🇳 Tiếng Việt
 
