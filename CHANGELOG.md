@@ -55,5 +55,7 @@
 - Randomized responses for repeated queries
 - Threading for smooth animations
 - Extended pattern matching cases
+
 **1.3.1:**
+
   - A few minor tweaks to optimize the code.
