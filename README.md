@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/realmg51-cpu/TinyAI/actions/workflows/Main-check.yml/badge.svg)
 ![Security Scan](https://github.com/realmg51-cpu/TinyAI/actions/workflows/codeql.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-GPL%20v3.0-blue.svg)
-![Version](https://img.shields.io/badge/version-1.2.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.3.0-green.svg)
 
 ---
 
@@ -65,7 +65,6 @@ Happy Coding! 🎉
 
 - [x] Local Backup System: Tự động sao lưu code theo từng phiên bản thời gian. 📂🛡️
 
-- [x] Hotfix-1: Sửa lỗi cú pháp dòng 36 (Huyền thoại! 😂). ✅
 
 🏗️ Phase 3: Future Goals (v1.3.0+)
 - [ ] Math Skills: Thêm khả năng tính toán cộng trừ nhân chia cơ bản. ➕➖
@@ -82,7 +81,7 @@ Happy Coding! 🎉
 
 TinyAI là một hệ thống trí tuệ nhân tạo đơn giản dựa trên quy tắc (rule-based), được xây dựng bằng C# và .NET. Đây là dự án đầu tay của mình, nhằm giúp những người mới bắt đầu hiểu được các nguyên lý cơ bản của AI thông qua thực hành.
 
- ### 🚀 Bắt đầu
+  ### 🚀 Bắt đầu
 **Sao chép dự án:**
 ```bash
 git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
