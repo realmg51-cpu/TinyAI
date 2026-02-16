@@ -1,7 +1,5 @@
 **1.0.0:**
 
-## ✨ New Features
-
    - First  version of TinyAI.
 
   1.1.0:
