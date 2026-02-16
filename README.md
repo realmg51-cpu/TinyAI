@@ -14,9 +14,9 @@
 
 ### 🚀 Getting Started
 1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/realmg51-cpu/TinyAI.git
-   cd TinyAI
+```bash
+git clone https://github.com/realmg51-cpu/TinyAI.git
+cd TinyAI
 ```
 
 Run the Program:
