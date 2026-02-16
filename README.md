@@ -13,7 +13,7 @@
 **TinyAI** is a lightweight, rule-based artificial intelligence system built with **C#** and **.NET**. This is my first project, designed to help beginners understand AI fundamentals through practical implementation.
 
 ### 🚀 Getting Started
-1. **Clone the Repository:**
+1.**Clone the Repository:**
 ```bash
 git clone https://github.com/realmg51-cpu/TinyAI.git
 cd TinyAI
