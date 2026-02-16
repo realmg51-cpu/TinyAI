@@ -15,14 +15,17 @@
 ### 🚀 Getting Started
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
+   git clone https://github.com/realmg51-cpu/TinyAI.git
    cd TinyAI
+```
+
 Run the Program:
 
 ```bash
 cd asset/code
 dotnet run
 ```
+
 # 🤝 Contributing
 Every contribution is highly appreciated! You can help by:
 
@@ -84,10 +87,12 @@ TinyAI là một hệ thống trí tuệ nhân tạo đơn giản dựa trên qu
   ### 🚀 Bắt đầu
 **Sao chép dự án:**
 ```bash
-git clone [https://github.com/realmg51-cpu/TinyAI.git](https://github.com/realmg51-cpu/TinyAI.git)
+git clone https://github.com/realmg51-cpu/TinyAI.git
 cd TinyAI
 ```
+
 Chạy chương trình:
+
 ```bash
 cd asset/code
 dotnet run
