@@ -18,7 +18,7 @@ git clone https://github.com/realmg51-cpu/TinyAI.git
 cd TinyAI
 ```
 
-Run the Program:
+2.**Run the Program:**
 
 ```bash
 cd asset/code
@@ -84,13 +84,13 @@ Happy Coding! 🎉
 TinyAI là một hệ thống trí tuệ nhân tạo đơn giản dựa trên quy tắc (rule-based), được xây dựng bằng C# và .NET. Đây là dự án đầu tay của mình, nhằm giúp những người mới bắt đầu hiểu được các nguyên lý cơ bản của AI thông qua thực hành.
 
   ### 🚀 Bắt đầu
-**Sao chép dự án:**
+1.**Sao chép dự án:**
 ```bash
 git clone https://github.com/realmg51-cpu/TinyAI.git
 cd TinyAI
 ```
 
-Chạy chương trình:
+2.**Chạy chương trình:**
 
 ```bash
 cd asset/code
