@@ -54,22 +54,16 @@ jobs:
         include:
           - os: windows-latest
             runtime: win-x64
-            extension: .exe
           - os: windows-latest
             runtime: win-arm64
-            extension: .exe
           - os: ubuntu-latest
             runtime: linux-x64
-            extension: 
           - os: ubuntu-latest
             runtime: linux-arm64
-            extension: 
           - os: macos-latest
             runtime: osx-x64
-            extension: 
           - os: macos-latest
             runtime: osx-arm64
-            extension: 
 
     steps:
     - name: Checkout code
@@ -107,7 +101,7 @@ jobs:
       shell: bash
       run: |
         cd "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
-        # Tìm file .exe đầu tiên và rename
+        # Find and rename the first .exe file
         for file in *.exe; do
           if [ -f "$file" ]; then
             mv "$file" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}.exe"
@@ -122,26 +116,34 @@ jobs:
       shell: bash
       run: |
         cd "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
-        # File không có extension trên Linux/macOS
         if [ -f "${{ env.PROJECT_NAME }}" ]; then
           mv "${{ env.PROJECT_NAME }}" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}"
           echo "Renamed to ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}"
         fi
         cd -
 
-    - name: Create zip archive
+    - name: Create archive (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        cd "${{ env.OUTPUT_DIR }}"
+        Compress-Archive -Path "${{ matrix.runtime }}" -DestinationPath "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.zip" -Force
+        Write-Host "Created archive: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.zip"
+
+    - name: Create archive (Linux/macOS)
+      if: runner.os != 'Windows'
       shell: bash
       run: |
         cd "${{ env.OUTPUT_DIR }}"
         zip -r "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.zip" "${{ matrix.runtime }}"
         echo "Created archive: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.zip"
-        cd -
 
     - name: Upload artifact for release
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}
         path: ${{ env.OUTPUT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.zip
+        if-no-files-found: error
         retention-days: 30
 
   # Job 3: Tạo Release và upload files
@@ -195,8 +197,8 @@ jobs:
         body: |
           # 🎉 ${{ env.PROJECT_NAME }} v${{ env.VERSION }}
           
-          ## 📦 Tải về
-          | Nền tảng | File |
+          ## 📦 Downloads
+          | Platform | File |
           |----------|------|
           | Windows x64 | `${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.zip` |
           | Windows ARM64 | `${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.zip` |
@@ -209,29 +211,24 @@ jobs:
           File SHA256 checksums are included in `.sha256` files.
           
           ## 🚀 Self-contained executable
-          - **Không cần cài đặt .NET Runtime**
-          - Tải về, giải nén và chạy ngay
-          - Hoạt động độc lập trên mọi máy
+          - **No .NET Runtime required**
+          - Download, extract and run immediately
+          - Works on any machine
           
-          ## ✨ Tính năng
-          - Rule-based AI chatbot đơn giản
-          - Chạy được trên mọi nền tảng
-          - Nhẹ, nhanh, không phụ thuộc
+          ## ✨ Features
+          - Simple rule-based AI chatbot
+          - Cross-platform support
+          - Lightweight and fast
           
-          ## 📝 Cách dùng
-          1. Tải file phù hợp với hệ điều hành của bạn
-          2. Giải nén file zip
-          3. Chạy file executable:
-             - **Windows**: Double-click `${{ env.PROJECT_NAME }}-${{ matrix.runtime }}.exe`
-             - **Linux/macOS**: Mở terminal và gõ `./${{ env.PROJECT_NAME }}-${{ matrix.runtime }}`
+          ## 📝 How to use
+          1. Download the file for your operating system
+          2. Extract the zip file
+          3. Run the executable:
+             - **Windows**: Double-click `${{ env.PROJECT_NAME }}-win-x64.exe`
+             - **Linux/macOS**: Open terminal and run `./${{ env.PROJECT_NAME }}-linux-x64`
           
-          ## 🔧 Yêu cầu hệ thống
-          - **Windows**: Windows 10/11 (64-bit)
-          - **Linux**: Any modern distribution (x64 or ARM64)
-          - **macOS**: macOS 11.0 or later (Intel or Apple Silicon)
-          
-          ## 💬 Phản hồi
-          Nếu gặp vấn đề, hãy tạo issue trên GitHub hoặc tham gia Discord của chúng tôi!
+          ## 💬 Feedback
+          If you encounter any issues, please create an issue on GitHub or join our Discord!
         draft: false
         prerelease: false
         files: |
