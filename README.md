@@ -58,6 +58,104 @@ Before you begin, ensure you have the following installed:
    output/TinyAI
    ```
 
+## 🐳 Running with Docker
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) installed on your system
+
+### Quick Start
+
+1. **Build the Docker image**
+   ```bash
+   docker build -t tinyai .
+```
+
+1. Run the container
+   ```bash
+   docker run --rm tinyai
+   ```
+
+Advanced Usage
+
+Interactive mode (if your app needs user input)
+
+```bash
+docker run -it --rm tinyai
+```
+
+Run with a specific name
+
+```bash
+docker run --name tinyai-container tinyai
+```
+
+List your Docker images
+
+```bash
+docker images
+```
+
+List running containers
+
+```bash
+docker ps
+```
+
+Stop a running container
+
+```bash
+docker stop tinyai-container
+```
+
+Remove a container
+
+```bash
+docker rm tinyai-container
+```
+
+Remove the Docker image
+
+```bash
+docker rmi tinyai
+```
+
+Docker Commands Cheat Sheet
+
+
+Example Output
+
+When you run TinyAI in Docker, you should see something like:
+
+```bash
+$ docker run --rm tinyai
+=== TinyAI ===
+Initializing rule-based AI...
+Loading rules...
+Ready!
+> 
+```
+### Docker Commands Cheat Sheet
+
+| Command | Description |
+|---------|-------------|
+| `docker build -t tinyai .` | Build the Docker image |
+| `docker run --rm tinyai` | Run and auto-remove container |
+| `docker run -it --rm tinyai` | Run in interactive mode |
+| `docker ps` | List running containers |
+| `docker ps -a` | List all containers |
+| `docker images` | List all images |
+| `docker stop <container>` | Stop a running container |
+| `docker rm <container>` | Remove a container |
+| `docker rmi tinyai` | Remove the image |
+Notes
+
+· The --rm flag automatically removes the container when it stops
+· Use -it flags for interactive applications that need keyboard input
+· The Docker image is based on .NET 8.0 runtime for minimal size
+
+```
+
+
 💡 How It Works
 
 TinyAI uses a simple rule-based system where:
