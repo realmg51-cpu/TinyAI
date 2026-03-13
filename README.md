@@ -83,7 +83,7 @@ TinyAI/
 
 Want to discuss, learn, and grow together? Join our Discord server!
 
-https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white
+[![Join our Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/wbBCZkenT)
 
 📝 License
 
