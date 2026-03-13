@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Phiên bản .NET bạn có thể đổi thành net8.0, net6.0 tùy theo máy -->
+    <TargetFramework>net8.0</TargetFramework>
+    
+    <!-- Thông tin cơ bản về project -->
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TinyAI</RootNamespace>
+    <AssemblyName>TinyAI</AssemblyName>
+    
+    <!-- Cấu hình build -->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- Version của ứng dụng -->
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0</FileVersion>
+    
+    <!-- Thông tin thêm -->
+    <Authors>realmg51-cpu</Authors>
+    <Description>A simple rule-based AI written in C# for learning purposes</Description>
+    <RepositoryUrl>https://github.com/realmg51-cpu/TinyAI</RepositoryUrl>
+    <PackageTags>ai, rule-based, learning, csharp</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Thêm package nếu bạn cần (ví dụ: Newtonsoft.Json để xử lý JSON) -->
+  <ItemGroup>
+    <!-- Bỏ comment dòng dưới nếu bạn muốn dùng Newtonsoft.Json -->
+    <!-- <PackageReference Include="Newtonsoft.Json" Version="13.0.3" /> -->
+    
+    <!-- Bỏ comment dòng dưới nếu bạn muốn dùng System.Text.Json (có sẵn trong .NET) -->
+    <!-- <PackageReference Include="System.Text.Json" Version="8.0.0" /> -->
+  </ItemGroup>
+
+  <!-- Bao gồm tất cả file .cs trong thư mục src -->
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
+  <!-- Copy các file cấu hình ra thư mục output -->
+  <ItemGroup>
+    <None Update="config/*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="rules/*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
