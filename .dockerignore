@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+.github/
+
+# Build output
+bin/
+obj/
+output/
+publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Test
+tests/
+TestResults/
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.temp
+*/**/.DS_Store
