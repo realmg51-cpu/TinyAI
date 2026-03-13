@@ -1,0 +1,91 @@
+# Build output directories
+bin/
+obj/
+output/
+publish/
+out/
+dist/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+.vscode/
+.idea/
+
+# .NET Core specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# Build results
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+*.lib
+*.exp
+*.ilk
+*.sys
+*.o
+*.obj
+*.lo
+*.la
+
+# NuGet packages
+packages/
+*.nupkg
+*.nuget.props
+*.nuget.targets
+
+# Test results
+TestResults/
+*.trx
+*.tmp
+*.cache
+*.txt
+*.xml
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+*.mdf
+*.ldf
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Visual Studio Code
+.history/
+*.swp
+*.swo
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Backup files
+*.bak
+*.old
+*.orig
+
+# Project-specific - TinyAI
+config/*.local.json
+rules/*.user.txt
+data/*.dat
