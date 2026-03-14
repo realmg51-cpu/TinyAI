@@ -153,7 +153,7 @@ Notes
 · Use -it flags for interactive applications that need keyboard input
 · The Docker image is based on .NET 8.0 runtime for minimal size
 
-```
+
 
 
 💡 How It Works
