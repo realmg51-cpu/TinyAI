@@ -166,7 +166,7 @@ TinyAI uses a simple rule-based system where:
 
 🛠️ Project Structure
 
-```
+```text
 TinyAI/
 ├── src/
 │   └── Main.cs           # Main source code
@@ -175,7 +175,10 @@ TinyAI/
 ├── build.sh              # Unix build script
 ├── .gitignore            # Git ignore rules
 └── README.md             # This file
+
 ```
+
+---
 
 🤝 Join the Community
 
