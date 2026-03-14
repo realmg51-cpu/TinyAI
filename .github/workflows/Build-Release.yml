@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "master" ]
     tags:
-      - 'v*.*.*'  # Khi push tag v1.0.0, v2.1.3, etc.
+      - 'v*.*.*'
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
@@ -14,8 +14,10 @@ env:
   PROJECT_NAME: 'TinyAI'
   PROJECT_PATH: 'src/Main/TinyAI.csproj'
   OUTPUT_DIR: 'publish'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Force dùng Node.js 24 ngay
 
 jobs:
+  # Job 1: Build và Test
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
@@ -24,12 +26,12 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4  # v4 mới nhất đã hỗ trợ Node.js 24
       with:
         fetch-depth: 0
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v4  # v4 mới nhất đã hỗ trợ Node.js 24
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -42,6 +44,7 @@ jobs:
     - name: Test
       run: dotnet test ${{ env.PROJECT_PATH }} --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
+  # Job 2: Publish self-contained executable cho nhiều nền tảng
   publish-self-contained:
     needs: build-and-test
     if: startsWith(github.ref, 'refs/tags/v')
@@ -112,6 +115,9 @@ jobs:
             echo "Created: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
           fi
         fi
+        
+        # Show files for debugging
+        ls -la
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -119,7 +125,9 @@ jobs:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}/${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}*
         retention-days: 30
+        if-no-files-found: error
 
+  # Job 3: Tạo Release
   create-release:
     needs: publish-self-contained
     if: startsWith(github.ref, 'refs/tags/v')
@@ -146,6 +154,13 @@ jobs:
         pattern: ${{ env.PROJECT_NAME }}-*-v${{ env.VERSION }}
         merge-multiple: true
 
+    - name: List downloaded files
+      run: |
+        echo "=== Downloaded files ==="
+        ls -la artifacts/
+        echo "=== File sizes ==="
+        du -sh artifacts/* | sort -h
+
     - name: Generate checksums
       shell: bash
       run: |
@@ -157,6 +172,18 @@ jobs:
           fi
         done
 
+    - name: Get file sizes for release body
+      id: file_sizes
+      shell: bash
+      run: |
+        cd artifacts
+        echo "WIN_X64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+        echo "WIN_ARM64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+        echo "LINUX_X64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+        echo "LINUX_ARM64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+        echo "OSX_X64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+        echo "OSX_ARM64_SIZE=$(du -h ${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A')" >> $GITHUB_ENV
+
     - name: Create release body
       run: |
         cat > release_body.md << EOF
@@ -167,35 +194,37 @@ jobs:
         ### Windows
         | Architecture | File | Size |
         |-------------|------|------|
-        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe | cut -f1) |
-        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe | cut -f1) |
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe) | ${{ env.WIN_X64_SIZE }} |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe) | ${{ env.WIN_ARM64_SIZE }} |
         
         ### Linux
         | Architecture | File | Size |
         |-------------|------|------|
-        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }} | cut -f1) |
-        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }} | cut -f1) |
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}) | ${{ env.LINUX_X64_SIZE }} |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}) | ${{ env.LINUX_ARM64_SIZE }} |
         
         ### macOS
         | Architecture | File | Size |
         |-------------|------|------|
-        | Intel | [⬇️ ${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }} | cut -f1) |
-        | Apple Silicon | [⬇️ ${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }} | cut -f1) |
+        | Intel | [⬇️ ${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}) | ${{ env.OSX_X64_SIZE }} |
+        | Apple Silicon | [⬇️ ${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}) | ${{ env.OSX_ARM64_SIZE }} |
         
         ## 🔒 Checksums
+        
         \`\`\`
-        $(cat artifacts/*.sha256 2>/dev/null || echo "No checksums available")
+        $(cd artifacts && cat *.sha256 2>/dev/null || echo "No checksums available")
         \`\`\`
         
         ## ✨ Features
         - Rule-based AI chatbot
         - Cross-platform support
-        - Self-contained (no runtime required)
+        - Self-contained (no .NET runtime required)
         - Lightweight and fast
         
         ## 📝 How to use
         
-        **Windows**: Double-click the \`.exe\` file
+        **Windows**:
+        - Double-click the \`.exe\` file
         
         **Linux/macOS**:
         \`\`\`bash
@@ -209,6 +238,9 @@ jobs:
         
         ## 💬 Feedback
         If you encounter any issues, please [create an issue](https://github.com/${{ github.repository }}/issues/new).
+        
+        ## 📦 Previous versions
+        See [all releases](https://github.com/${{ github.repository }}/releases) for older versions.
         EOF
 
     - name: Create Release (set as latest)
@@ -219,8 +251,14 @@ jobs:
         body_path: release_body.md
         draft: false
         prerelease: false
-        latest: true  # QUAN TRỌNG: Set làm latest release
+        latest: true
         files: |
           artifacts/*
+        fail_on_unmatched_files: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Verify release
+      run: |
+        echo "✅ Release v${{ env.VERSION }} created successfully!"
+        echo "🔗 https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
