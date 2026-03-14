@@ -49,7 +49,7 @@ jobs:
     - name: Build with ${{ matrix.configuration }}
       run: dotnet build ${{ env.PROJECT_PATH }} --configuration ${{ matrix.configuration }} --no-restore
 
-    # Test with TRX logger
+    # Test với TRX logger
     - name: Test
       run: dotnet test ${{ env.PROJECT_PATH }} --configuration ${{ matrix.configuration }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
@@ -62,7 +62,7 @@ jobs:
         path: '**/*.trx'
         retention-days: 30
 
-  # Job 2: Publish self-contained executable
+  # Job 2: Publish self-contained executable cho nhiều nền tảng
   publish-self-contained:
     needs: build-and-test
     if: startsWith(github.ref, 'refs/tags/v')
@@ -83,13 +83,13 @@ jobs:
             runtime: osx-x64
           - os: macos-latest
             runtime: osx-arm64
-      fail-fast: false  # Không dừng khi một nền tảng fail
+      fail-fast: false
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Cần cho git describe
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -119,8 +119,9 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "✅ Valid version: $VERSION"
 
-    # Verify tag signature (optional - chỉ khi có GPG)
+    # Verify tag signature - ĐÃ FIX LỖI POWERSHELL
     - name: Verify tag signature
+      shell: bash
       continue-on-error: true
       run: |
         if command -v git &> /dev/null; then
@@ -201,7 +202,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Cần cho git log
+        fetch-depth: 0
 
     - name: Get version
       id: get_version
@@ -310,7 +311,7 @@ jobs:
         
         ## 📦 Self-contained Executable
         - No .NET runtime required
-        - Download, extract and run immediately
+        - Download and run immediately
         - Works on any compatible system
         
         ## 🚀 How to Use
@@ -361,22 +362,25 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Optional: CodeQL Analysis
+  # Job 4: CodeQL Analysis với @v4
   codeql-analysis:
     needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+      actions: read
+      contents: read
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v4
       with:
         languages: csharp
+        queries: security-and-quality
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -387,11 +391,21 @@ jobs:
       run: dotnet build ${{ env.PROJECT_PATH }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:csharp"
 
-  # Notification on failure
+    - name: Upload CodeQL results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: codeql-results
+        path: results
+        retention-days: 30
+
+  # Job 5: Notification on failure
   notify-failure:
-    needs: [build-and-test, publish-self-contained, create-release]
+    needs: [build-and-test, publish-self-contained, create-release, codeql-analysis]
     if: failure() && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -401,4 +415,4 @@ jobs:
         echo "🔍 Check details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         
         # Add Slack/Discord/Teams webhook here if needed
-        # curl -X POST -H 'Content-type: application/json' --data '{"text":"Workflow failed!"}' ${{ secrets.SLACK_WEBHOOK }}
+        # curl -X POST -H 'Content-type: application/json' --data '{"text":"Workflow failed for ${{ env.PROJECT_NAME }}!"}' ${{ secrets.SLACK_WEBHOOK }}
