@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "master" ]
     tags:
-      - 'v*.*.*'
+      - 'v*.*.*'  # Khi push tag v1.0.0, v2.1.3, etc.
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
@@ -25,6 +25,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -76,6 +78,7 @@ jobs:
       run: |
         VERSION=${GITHUB_REF#refs/tags/v}
         echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "RELEASE_NAME=${{ env.PROJECT_NAME }} v$VERSION" >> $GITHUB_ENV
 
     - name: Publish for ${{ matrix.runtime }}
       shell: bash
@@ -89,20 +92,24 @@ jobs:
           -p:DebugSymbols=false \
           --output "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
 
-    - name: Prepare files
+    - name: Prepare executable files
       shell: bash
       run: |
         cd "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
         if [ "${{ runner.os }}" = "Windows" ]; then
+          # Windows: rename .exe
           for file in *.exe; do
             if [ -f "$file" ]; then
               mv "$file" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.exe"
+              echo "Created: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.exe"
             fi
           done
         else
+          # Linux/macOS: rename binary
           if [ -f "${{ env.PROJECT_NAME }}" ]; then
             mv "${{ env.PROJECT_NAME }}" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
             chmod +x "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
+            echo "Created: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
           fi
         fi
 
@@ -146,40 +153,74 @@ jobs:
         for file in *; do
           if [ -f "$file" ] && [[ ! "$file" == *.sha256 ]]; then
             sha256sum "$file" > "$file.sha256"
+            echo "Generated checksum for $file"
           fi
         done
 
-    - name: Prepare release body
+    - name: Create release body
       run: |
         cat > release_body.md << EOF
         # 🎉 ${{ env.PROJECT_NAME }} v${{ env.VERSION }}
         
-        ## 📦 Downloads
+        ## 📥 Downloads
         
         ### Windows
-        - \`${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe\` - 64-bit
-        - \`${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe\` - ARM64
+        | Architecture | File | Size |
+        |-------------|------|------|
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe | cut -f1) |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe | cut -f1) |
         
         ### Linux
-        - \`${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}\` - 64-bit
-        - \`${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}\` - ARM64
+        | Architecture | File | Size |
+        |-------------|------|------|
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }} | cut -f1) |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }} | cut -f1) |
         
         ### macOS
-        - \`${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}\` - Intel
-        - \`${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}\` - Apple Silicon
+        | Architecture | File | Size |
+        |-------------|------|------|
+        | Intel | [⬇️ ${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }} | cut -f1) |
+        | Apple Silicon | [⬇️ ${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }} | cut -f1) |
         
         ## 🔒 Checksums
-        SHA256 checksums are included in \`.sha256\` files.
+        \`\`\`
+        $(cat artifacts/*.sha256 2>/dev/null || echo "No checksums available")
+        \`\`\`
         
-        ## 🚀 Self-contained
-        No .NET runtime required - download and run!
+        ## ✨ Features
+        - Rule-based AI chatbot
+        - Cross-platform support
+        - Self-contained (no runtime required)
+        - Lightweight and fast
+        
+        ## 📝 How to use
+        
+        **Windows**: Double-click the \`.exe\` file
+        
+        **Linux/macOS**:
+        \`\`\`bash
+        chmod +x ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}
+        ./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}
+        \`\`\`
+        
+        ## 📋 Requirements
+        - No additional runtime needed
+        - Works on any compatible system
+        
+        ## 💬 Feedback
+        If you encounter any issues, please [create an issue](https://github.com/${{ github.repository }}/issues/new).
         EOF
 
-    - name: Create Release with GitHub CLI
-      run: |
-        gh release create v${{ env.VERSION }} \
-          --title "${{ env.PROJECT_NAME }} v${{ env.VERSION }}" \
-          --notes-file release_body.md \
+    - name: Create Release (set as latest)
+      uses: softprops/action-gh-release@v2
+      with:
+        name: ${{ env.PROJECT_NAME }} v${{ env.VERSION }}
+        tag_name: ${{ github.ref }}
+        body_path: release_body.md
+        draft: false
+        prerelease: false
+        latest: true  # QUAN TRỌNG: Set làm latest release
+        files: |
           artifacts/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
