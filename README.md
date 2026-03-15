@@ -18,7 +18,7 @@ This project was created to:
 ### Prerequisites
 
 Before you begin, ensure you have the following installed:
-- [.NET SDK 8.0](https://dotnet.microsoft.com/download) (or later)
+- [.NET SDK 8.0](https://dotnet.microsoft.com/download) to run the clone
 - [Git](https://git-scm.com/downloads) (for cloning)
 
 ### Installation
