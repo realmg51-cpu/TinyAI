@@ -119,21 +119,9 @@ Remove the Docker image
 docker rmi tinyai
 ```
 
-Docker Commands Cheat Sheet
 
 
-Example Output
 
-When you run TinyAI in Docker, you should see something like:
-
-```bash
-$ docker run --rm tinyai
-=== TinyAI ===
-Initializing rule-based AI...
-Loading rules...
-Ready!
-> 
-```
 ### Docker Commands Cheat Sheet
 
 | Command | Description |
@@ -164,27 +152,13 @@ TinyAI uses a simple rule-based system where:
 · Responses are triggered based on matching rules
 · The system can be extended by adding new rules
 
-🛠️ Project Structure
-
-```text
-TinyAI/
-├── src/
-│   └── Main.cs           # Main source code
-├── TinyAI.csproj         # Project configuration
-├── build.cmd             # Windows build script
-├── build.sh              # Unix build script
-├── .gitignore            # Git ignore rules
-└── README.md             # This file
-
-```
-
 ---
 
 🤝 Join the Community
 
 Want to discuss, learn, and grow together? Join our Discord server!
 
-[![Join our Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/wbBCZkenT)
+[![Join our Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=blue)](https://discord.gg/wbBCZkenT)
 
 📝 License
 
