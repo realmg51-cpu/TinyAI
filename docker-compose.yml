@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  tinyai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tinyai-chatbot
+    stdin_open: true  # Giữ interactive mode
+    tty: true        # Allocate pseudo-TTY
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - TZ=Asia/Ho_Chi_Minh
+    restart: unless-stopped
