@@ -89,7 +89,10 @@ namespace TinyAI
                 {
                     Say("You're welcome!");
                 }
-                
+                else if (lowerInput.Contains("huh") || lowerInput.Contains("hmm"))
+                {
+                    Say("hmm... What are you tninking for?");
+                }
                 // Goodbye messages
                 else if (lowerInput.Contains("bye") || lowerInput.Contains("goodbye"))
                 {
