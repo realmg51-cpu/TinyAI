@@ -1,9 +1,6 @@
-# Dependabot configuration file for TinyAI project
-# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  # Maintain dependencies for NuGet (.NET projects)
+  # NuGet dependencies
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
@@ -11,63 +8,33 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Ho_Chi_Minh"
-    
-    # Version strategy
-    versioning-strategy: increase
-    
-    # Labels for PRs
     labels:
       - "dependencies"
       - "automated-pr"
       - "nuget"
-      - "skip-changelog"  # Bỏ qua changelog nếu không cần
-    
-    # Group dependencies by type
     groups:
-      major-updates:
+      all-dependencies:
         patterns:
           - "*"
-        update-types:
-          - "major"
-      minor-patch-updates:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-    
-    # Commit message style
     commit-message:
       prefix: "deps"
-      prefix-development: "deps(dev)"
       include: "scope"
-    
-    # Limits and branches
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     target-branch: "main"
     pull-request-branch-name:
       separator: "-"
-    
-    # Ignore major updates for Microsoft packages
     ignore:
       - dependency-name: "Microsoft.*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "System.*"
         update-types: ["version-update:semver-major"]
-    
-    # Reviewers and assignees
     reviewers:
       - "your-github-username"
     assignees:
       - "your-github-username"
-    
-    # Auto-rebase strategy
     rebase-strategy: "auto"
-    
-    # Milestone (optional)
-    # milestone: 5
 
-  # Maintain dependencies for GitHub Actions
+  # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -75,40 +42,22 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Ho_Chi_Minh"
-    
     labels:
       - "dependencies"
       - "automated-pr"
       - "github-actions"
-      - "ci-cd"
-    
     groups:
       actions:
         patterns:
           - "*"
-    
     commit-message:
       prefix: "ci"
       include: "scope"
-    
-    reviewers:
-      - "realmg51-cpu"
-    
     open-pull-requests-limit: 5
-    
-    # Always update to latest
-    ignore:
-      - dependency-name: "*"
-        update-types: []
-
-# Optional: Add registries if using private feeds
-registries:
-  nuget.org:
-    type: nuget-feed
-    url: https://api.nuget.org/v3/index.json
-  
-  # Private NuGet feed (if needed)
-  # private-nuget:
-  #   type: nuget-feed
-  #   url: https://private-nuget.example.com/v3/index.json
-  #   token: ${{ secrets.PRIVATE_NUGET_TOKEN }}
+    target-branch: "main"
+    reviewers:
+      - "your-github-username"
+    assignees:
+      - "your-github-username"
+    rebase-strategy: "auto"
+    ignore: []  # Don't ignore any GitHub Actions updates
