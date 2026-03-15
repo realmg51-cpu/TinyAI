@@ -19,6 +19,9 @@ jobs:
   # Job 1: Build và Test với caching
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write  # Để upload test results
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -67,6 +70,8 @@ jobs:
     needs: build-and-test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write  # Để upload artifacts
     
     strategy:
       matrix:
@@ -119,7 +124,7 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "✅ Valid version: $VERSION"
 
-    # Verify tag signature - ĐÃ FIX LỖI POWERSHELL
+    # Verify tag signature
     - name: Verify tag signature
       shell: bash
       continue-on-error: true
@@ -408,6 +413,8 @@ jobs:
     needs: [build-and-test, publish-self-contained, create-release, codeql-analysis]
     if: failure() && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # 👈 THÊM permissions để fix CodeQL warning
     steps:
     - name: Send notification
       run: |
