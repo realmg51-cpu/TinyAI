@@ -1,0 +1,60 @@
+# Dependabot configuration file for TinyAI project
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Maintain dependencies for NuGet (.NET projects)
+  - package-ecosystem: "nuget"
+    directory: "/"  # Location of package manifests (csproj file)
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Ho_Chi_Minh"
+    # Specify labels for pull requests
+    labels:
+      - "dependencies"
+      - "automated-pr"
+      - "nuget"
+    # Group all dependencies into one PR to reduce noise
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
+    # Configure commit message style
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Set limit for open dependabot PRs
+    open-pull-requests-limit: 5
+    # Target branch for pull requests
+    target-branch: "main"
+    # Allow up to 10 simultaneous PRs
+    pull-request-branch-name:
+      separator: "-"
+    # Ignore certain dependencies (if needed)
+    ignore:
+      - dependency-name: "Microsoft.*"
+        update-types: ["version-update:semver-major"]  # Ignore major updates for Microsoft packages
+    # Reviewers for the PRs
+    reviewers:
+      - "your-github-username"  # Thay bằng username của bạn
+    # Assignees for the PRs
+    assignees:
+      - "your-github-username"  # Thay bằng username của bạn
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Ho_Chi_Minh"
+    labels:
+      - "dependencies"
+      - "automated-pr"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
