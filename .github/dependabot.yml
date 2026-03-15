@@ -5,43 +5,67 @@ version: 2
 updates:
   # Maintain dependencies for NuGet (.NET projects)
   - package-ecosystem: "nuget"
-    directory: "/"  # Location of package manifests (csproj file)
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "09:00"
       timezone: "Asia/Ho_Chi_Minh"
-    # Specify labels for pull requests
+    
+    # Version strategy
+    versioning-strategy: increase
+    
+    # Labels for PRs
     labels:
       - "dependencies"
       - "automated-pr"
       - "nuget"
-    # Group all dependencies into one PR to reduce noise
+      - "skip-changelog"  # Bỏ qua changelog nếu không cần
+    
+    # Group dependencies by type
     groups:
-      all-dependencies:
+      major-updates:
         patterns:
           - "*"
-    # Configure commit message style
+        update-types:
+          - "major"
+      minor-patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Commit message style
     commit-message:
       prefix: "deps"
+      prefix-development: "deps(dev)"
       include: "scope"
-    # Set limit for open dependabot PRs
-    open-pull-requests-limit: 5
-    # Target branch for pull requests
+    
+    # Limits and branches
+    open-pull-requests-limit: 10
     target-branch: "main"
-    # Allow up to 10 simultaneous PRs
     pull-request-branch-name:
       separator: "-"
-    # Ignore certain dependencies (if needed)
+    
+    # Ignore major updates for Microsoft packages
     ignore:
       - dependency-name: "Microsoft.*"
-        update-types: ["version-update:semver-major"]  # Ignore major updates for Microsoft packages
-    # Reviewers for the PRs
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.*"
+        update-types: ["version-update:semver-major"]
+    
+    # Reviewers and assignees
     reviewers:
-      - "your-github-username"  # Thay bằng username của bạn
-    # Assignees for the PRs
+      - "your-github-username"
     assignees:
-      - "your-github-username"  # Thay bằng username của bạn
+      - "your-github-username"
+    
+    # Auto-rebase strategy
+    rebase-strategy: "auto"
+    
+    # Milestone (optional)
+    # milestone: 5
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -51,10 +75,40 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Ho_Chi_Minh"
+    
     labels:
       - "dependencies"
       - "automated-pr"
       - "github-actions"
+      - "ci-cd"
+    
+    groups:
+      actions:
+        patterns:
+          - "*"
+    
     commit-message:
       prefix: "ci"
       include: "scope"
+    
+    reviewers:
+      - "realmg51-cpu"
+    
+    open-pull-requests-limit: 5
+    
+    # Always update to latest
+    ignore:
+      - dependency-name: "*"
+        update-types: []
+
+# Optional: Add registries if using private feeds
+registries:
+  nuget.org:
+    type: nuget-feed
+    url: https://api.nuget.org/v3/index.json
+  
+  # Private NuGet feed (if needed)
+  # private-nuget:
+  #   type: nuget-feed
+  #   url: https://private-nuget.example.com/v3/index.json
+  #   token: ${{ secrets.PRIVATE_NUGET_TOKEN }}
