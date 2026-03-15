@@ -1,0 +1,66 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.cs'
+      - '**.csproj'
+      - 'Dockerfile'
+      - '.github/workflows/docker-build-test.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.cs'
+      - '**.csproj'
+      - 'Dockerfile'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: tinyai:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Test Docker image
+        run: |
+          # Test 1: Image tồn tại
+          docker images | grep tinyai
+          
+          # Test 2: Container có thể start
+          docker run -d --name tinyai-test tinyai:test sleep 10
+          docker ps -a | grep tinyai-test
+          
+          # Test 3: Cleanup
+          docker stop tinyai-test || true
+          docker rm tinyai-test || true
+      
+      - name: Test interactive mode
+        run: |
+          # Test echo command to container
+          echo "exit" | docker run -i --rm tinyai:test
+          
+      - name: Image size check
+        run: |
+          # Kiểm tra kích thước image (< 200MB)
+          SIZE=$(docker images tinyai:test --format "{{.Size}}" | sed 's/MB//g' | sed 's/M//g')
+          if (( $(echo "$SIZE > 200" | bc -l) )); then
+            echo "Image size $SIZE MB is too large!"
+            exit 1
+          fi
+          echo "Image size $SIZE MB - OK"
