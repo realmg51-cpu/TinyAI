@@ -1,6 +1,9 @@
+# Dependabot configuration file for TinyAI project
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
-  # NuGet dependencies
+  # Maintain dependencies for NuGet (.NET projects)
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
@@ -34,7 +37,7 @@ updates:
       - "your-github-username"
     rebase-strategy: "auto"
 
-  # GitHub Actions dependencies
+  # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -60,4 +63,4 @@ updates:
     assignees:
       - "your-github-username"
     rebase-strategy: "auto"
-    ignore: []  # Don't ignore any GitHub Actions updates
+    # KHÔNG khai báo ignore - Dependabot sẽ update tất cả
