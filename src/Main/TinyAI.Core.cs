@@ -34,7 +34,7 @@ namespace TinyAI
                 // Check for exit command first
                 if (lowerInput == "exit")
                 {
-                    isRunning = false;  // Stop the loop
+                    run = false;  // Stop the loop
                     Say("Goodbye! 👋");
                 }
                 
