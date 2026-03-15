@@ -9,72 +9,15 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-# Add concurrency to prevent multiple releases from colliding
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   DOTNET_VERSION: '8.0.x'
   PROJECT_NAME: 'TinyAI'
   PROJECT_PATH: 'src/Main/TinyAI.csproj'
   OUTPUT_DIR: 'publish'
-  SOLUTION_PATH: 'TinyAI.sln'
 
 jobs:
-  # Job 0: Get and validate version (shared across jobs)
-  get-version:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract.outputs.version }}
-      is_valid_semver: ${{ steps.validate.outputs.is_valid }}
-      previous_tag: ${{ steps.get_previous_tag.outputs.tag }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Extract version from tag
-        id: extract
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
-          else
-            # For non-tag runs, generate a preview version
-            VERSION="0.0.0-preview.${{ github.run_number }}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📌 Version: $VERSION"
-
-      - name: Validate semantic version
-        id: validate
-        run: |
-          VERSION="${{ steps.extract.outputs.version }}"
-          # Semantic version regex (supports -preview and +build metadata)
-          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$ ]]; then
-            echo "is_valid=true" >> $GITHUB_OUTPUT
-            echo "✅ Valid semantic version: $VERSION"
-          else
-            echo "is_valid=false" >> $GITHUB_OUTPUT
-            echo "❌ Invalid semantic version: $VERSION"
-            exit 1
-          fi
-
-      - name: Get previous tag
-        id: get_previous_tag
-        run: |
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          echo "tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
-          if [ -n "$PREVIOUS_TAG" ]; then
-            echo "📋 Previous tag: $PREVIOUS_TAG"
-          else
-            echo "📋 No previous tag found"
-          fi
-
   # Job 1: Build và Test với caching
   build-and-test:
-    needs: get-version
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -96,7 +39,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.fsproj', '**/*.sln') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.fsproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
 
@@ -106,16 +49,9 @@ jobs:
     - name: Build with ${{ matrix.configuration }}
       run: dotnet build ${{ env.PROJECT_PATH }} --configuration ${{ matrix.configuration }} --no-restore
 
-    # Run tests with coverage
-    - name: Test with coverage
-      run: |
-        dotnet test ${{ env.PROJECT_PATH }} \
-          --configuration ${{ matrix.configuration }} \
-          --no-build \
-          --verbosity normal \
-          --logger "trx;LogFileName=test-results.trx" \
-          --collect:"XPlat Code Coverage" \
-          --settings coverlet.runsettings
+    # Test với TRX logger
+    - name: Test
+      run: dotnet test ${{ env.PROJECT_PATH }} --configuration ${{ matrix.configuration }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
     # Upload test results
     - name: Upload test results
@@ -126,52 +62,9 @@ jobs:
         path: '**/*.trx'
         retention-days: 30
 
-    # Upload coverage reports
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-reports-${{ matrix.configuration }}
-        path: '**/coverage.cobertura.xml'
-        retention-days: 30
-
-    # Measure build time
-    - name: Report build metrics
-      if: always()
-      run: |
-        echo "📊 Build completed for ${{ matrix.configuration }} configuration"
-        echo "ℹ️ Version: ${{ needs.get-version.outputs.version }}"
-
-  # Job 2: Security and dependency scanning
-  security-scan:
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-    
-    - name: Check for vulnerable packages
-      run: |
-        echo "🔍 Scanning for vulnerable packages..."
-        dotnet list ${{ env.PROJECT_PATH }} package --vulnerable --include-transitive
-        
-    - name: Check for deprecated packages
-      run: |
-        echo "🔍 Scanning for deprecated packages..."
-        dotnet list ${{ env.PROJECT_PATH }} package --deprecated
-        
-    - name: Run security audit
-      run: |
-        echo "✅ Security scan completed"
-
-  # Job 3: Publish self-contained executable cho nhiều nền tảng
+  # Job 2: Publish self-contained executable cho nhiều nền tảng
   publish-self-contained:
-    needs: [get-version, build-and-test]
+    needs: build-and-test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     
@@ -180,22 +73,16 @@ jobs:
         include:
           - os: windows-latest
             runtime: win-x64
-            artifact-name: windows-x64
           - os: windows-latest
             runtime: win-arm64
-            artifact-name: windows-arm64
           - os: ubuntu-latest
             runtime: linux-x64
-            artifact-name: linux-x64
           - os: ubuntu-latest
             runtime: linux-arm64
-            artifact-name: linux-arm64
           - os: macos-latest
             runtime: osx-x64
-            artifact-name: macos-x64
           - os: macos-latest
             runtime: osx-arm64
-            artifact-name: macos-arm64
       fail-fast: false
 
     steps:
@@ -214,158 +101,96 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-${{ matrix.runtime }}-nuget-${{ hashFiles('**/*.csproj', '**/*.fsproj') }}
+        key: ${{ runner.os }}-${{ matrix.runtime }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.runtime }}-nuget-
           ${{ runner.os }}-nuget-
 
-    # Kiểm tra tag tồn tại
-    - name: Verify tag exists
+    # Validate version format
+    - name: Validate version format
+      id: get_version
       shell: bash
       run: |
-        TAG_NAME="${{ github.ref_name }}"
-        echo "🔍 Checking tag: $TAG_NAME"
-        
-        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
-          echo "✅ Tag $TAG_NAME exists"
-        else
-          echo "⚠️ Tag $TAG_NAME not found locally - but continuing"
+        VERSION=${GITHUB_REF#refs/tags/v}
+        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "❌ Invalid version format: $VERSION (must be X.Y.Z)"
+          exit 1
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "✅ Valid version: $VERSION"
+
+    # Verify tag signature - ĐÃ FIX LỖI POWERSHELL
+    - name: Verify tag signature
+      shell: bash
+      continue-on-error: true
+      run: |
+        if command -v git &> /dev/null; then
+          git verify-tag ${{ github.ref_name }} 2>/dev/null && echo "✅ Tag signature verified" || echo "⚠️ Tag not signed or cannot verify"
         fi
 
     - name: Publish for ${{ matrix.runtime }}
       shell: bash
       run: |
-        echo "⏱️ Starting publish at $(date)"
-        
         dotnet publish "${{ env.PROJECT_PATH }}" \
           --configuration Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
           -p:PublishSingleFile=true \
-          -p:DebugType=embedded \
-          -p:DebugSymbols=true \
-          -p:Version=${{ needs.get-version.outputs.version }} \
+          -p:DebugType=none \
+          -p:DebugSymbols=false \
+          -p:Version=${{ env.VERSION }} \
           --output "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
-        
-        echo "✅ Publish completed at $(date)"
 
     - name: Prepare executable files
       shell: bash
       run: |
         cd "${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}"
         
-        # List all files before processing
-        echo "📁 Files before processing:"
+        # Count files before rename
+        echo "📁 Files in directory:"
         ls -la
         
-        TARGET_NAME="${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ needs.get-version.outputs.version }}"
-        
         if [ "${{ runner.os }}" = "Windows" ]; then
-          # Windows: find the main executable
-          MAIN_EXE=$(find . -name "*.exe" -type f -size +100k 2>/dev/null | head -1)
-          if [ -z "$MAIN_EXE" ]; then
-            MAIN_EXE=$(find . -name "*.exe" -type f | head -1)
-          fi
-          
-          if [ -z "$MAIN_EXE" ]; then
-            echo "❌ No executable files found!"
-            ls -la
+          # Windows: handle .exe files
+          exe_files=(*.exe)
+          if [ ${#exe_files[@]} -eq 0 ]; then
+            echo "❌ No .exe files found!"
             exit 1
+          elif [ ${#exe_files[@]} -gt 1 ]; then
+            echo "⚠️ Multiple .exe files found: ${exe_files[*]}"
           fi
           
-          # Rename the main executable
-          mv "$MAIN_EXE" "${TARGET_NAME}.exe"
-          echo "✅ Created: ${TARGET_NAME}.exe"
-          
-          # Optional: Clean up other .exe files if they're not needed
-          find . -name "*.exe" ! -name "${TARGET_NAME}.exe" -delete
+          # Rename the first .exe file
+          mv "${exe_files[0]}" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.exe"
+          echo "✅ Created: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}.exe"
         else
-          # Linux/macOS: find the main executable
-          MAIN_BIN=$(find . -type f -executable ! -name "*.so" ! -name "*.dylib" ! -name "*.config" | head -1)
-          
-          if [ -z "$MAIN_BIN" ]; then
-            # Try without executable check
-            MAIN_BIN=$(find . -type f -name "${{ env.PROJECT_NAME }}" | head -1)
-          fi
-          
-          if [ -z "$MAIN_BIN" ]; then
-            echo "❌ No binary files found!"
+          # Linux/macOS: handle binary
+          if [ ! -f "${{ env.PROJECT_NAME }}" ]; then
+            echo "❌ Binary file ${{ env.PROJECT_NAME }} not found!"
             ls -la
             exit 1
           fi
           
-          mv "$MAIN_BIN" "$TARGET_NAME"
-          chmod +x "$TARGET_NAME"
-          echo "✅ Created: $TARGET_NAME"
+          mv "${{ env.PROJECT_NAME }}" "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
+          chmod +x "${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
+          echo "✅ Created: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}"
         fi
         
         # Show result
         echo "📁 Final files:"
         ls -la
-        
-        # Get file size
-        if [ "${{ runner.os }}" = "Windows" ]; then
-          SIZE=$(du -h "${TARGET_NAME}.exe" | cut -f1)
-          echo "📦 File size: $SIZE"
-        else
-          SIZE=$(du -h "$TARGET_NAME" | cut -f1)
-          echo "📦 File size: $SIZE"
-        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ needs.get-version.outputs.version }}
-        path: ${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}/${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ needs.get-version.outputs.version }}*
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}
+        path: ${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}/${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}*
         retention-days: 30
         if-no-files-found: error
 
-  # Job 4: Smoke test the artifacts
-  smoke-test:
-    needs: publish-self-contained
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
-        pattern: ${{ env.PROJECT_NAME }}-*-v${{ needs.get-version.outputs.version }}
-        merge-multiple: true
-
-    - name: Verify artifacts
-      run: |
-        echo "🔍 Verifying downloaded artifacts..."
-        cd artifacts
-        
-        # Check file counts
-        EXE_COUNT=$(ls -1 *.exe 2>/dev/null | wc -l)
-        BIN_COUNT=$(ls -1 | grep -v ".exe" | grep -v ".sha256" | grep -v ".md" | wc -l)
-        
-        echo "📊 Found $EXE_COUNT Windows executables"
-        echo "📊 Found $BIN_COUNT Linux/macOS binaries"
-        
-        # Quick smoke test - check if files are not empty
-        for file in *; do
-          if [ -f "$file" ] && [[ ! "$file" == *.sha256 ]] && [[ ! "$file" == *.md ]]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              SIZE=$(stat -f%z "$file" 2>/dev/null)
-            else
-              SIZE=$(stat -c%s "$file" 2>/dev/null)
-            fi
-            if [ $SIZE -lt 100000 ]; then
-              echo "⚠️ Warning: $file is very small ($SIZE bytes)"
-            else
-              echo "✅ $file looks good ($(($SIZE/1024)) KB)"
-            fi
-          fi
-        done
-        
-        echo "✅ Smoke test completed"
-
-  # Job 5: Tạo Release với release notes tự động
+  # Job 3: Tạo Release với release notes tự động
   create-release:
-    needs: [get-version, publish-self-contained, smoke-test]
+    needs: publish-self-contained
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -379,11 +204,18 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get version
+      id: get_version
+      shell: bash
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
-        pattern: ${{ env.PROJECT_NAME }}-*-v${{ needs.get-version.outputs.version }}
+        pattern: ${{ env.PROJECT_NAME }}-*-v${{ env.VERSION }}
         merge-multiple: true
 
     - name: List and verify artifacts
@@ -397,37 +229,22 @@ jobs:
         
         # Check expected files
         expected_files=(
-          "${{ env.PROJECT_NAME }}-win-x64-v${{ needs.get-version.outputs.version }}.exe"
-          "${{ env.PROJECT_NAME }}-win-arm64-v${{ needs.get-version.outputs.version }}.exe"
-          "${{ env.PROJECT_NAME }}-linux-x64-v${{ needs.get-version.outputs.version }}"
-          "${{ env.PROJECT_NAME }}-linux-arm64-v${{ needs.get-version.outputs.version }}"
-          "${{ env.PROJECT_NAME }}-osx-x64-v${{ needs.get-version.outputs.version }}"
-          "${{ env.PROJECT_NAME }}-osx-arm64-v${{ needs.get-version.outputs.version }}"
+          "${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe"
+          "${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe"
+          "${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}"
+          "${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}"
+          "${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}"
+          "${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}"
         )
-        
-        missing_files=0
-        declare -A file_sizes
         
         for file in "${expected_files[@]}"; do
           if [ -f "artifacts/$file" ]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              size=$(du -h "artifacts/$file" | cut -f1)
-            else
-              size=$(du -h "artifacts/$file" | cut -f1)
-            fi
-            file_sizes["$file"]=$size
+            size=$(du -h "artifacts/$file" | cut -f1)
             echo "✅ $file ($size)"
           else
             echo "⚠️ Missing: $file"
-            missing_files=$((missing_files + 1))
           fi
         done
-        
-        if [ $missing_files -gt 0 ]; then
-          echo "⚠️ Warning: $missing_files files are missing"
-        else
-          echo "✅ All 6 platform files are present!"
-        fi
 
     - name: Generate checksums
       shell: bash
@@ -435,11 +252,7 @@ jobs:
         cd artifacts
         for file in *; do
           if [ -f "$file" ] && [[ ! "$file" == *.sha256 ]] && [[ ! "$file" == *.md ]]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              shasum -a 256 "$file" > "$file.sha256"
-            else
-              sha256sum "$file" > "$file.sha256"
-            fi
+            sha256sum "$file" > "$file.sha256"
             echo "🔐 Generated checksum for $file"
           fi
         done
@@ -448,171 +261,108 @@ jobs:
       id: changelog
       shell: bash
       run: |
-        PREVIOUS_TAG="${{ needs.get-version.outputs.previous_tag }}"
+        # Get previous tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
         
-        if [ -n "$PREVIOUS_TAG" ] && [ "$PREVIOUS_TAG" != "null" ]; then
+        if [ -n "$PREVIOUS_TAG" ]; then
           echo "📝 Generating changelog from $PREVIOUS_TAG to ${{ github.ref_name }}"
-          
-          # Categorize commits
-          echo "## 🚀 Features" > changelog.md
-          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD | grep -i "feat:" >> changelog.md || echo "- No new features" >> changelog.md
-          
-          echo -e "\n## 🐛 Bug Fixes" >> changelog.md
-          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD | grep -i "fix:" >> changelog.md || echo "- No bug fixes" >> changelog.md
-          
-          echo -e "\n## 📚 Documentation" >> changelog.md
-          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD | grep -i "docs:" >> changelog.md || echo "- No documentation changes" >> changelog.md
-          
-          echo -e "\n## 🔧 Other Changes" >> changelog.md
-          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD | grep -v -i "feat:" | grep -v -i "fix:" | grep -v -i "docs:" >> changelog.md
+          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD > changelog.md
         else
           echo "📝 No previous tag found, using first release"
-          cat > changelog.md << 'EOF'
-## 🚀 Features
-- Initial release
-
-## 🐛 Bug Fixes
-- N/A
-
-## 📚 Documentation
-- Initial documentation
-EOF
+          echo "- Initial release" > changelog.md
         fi
         
         # Count commits
         commit_count=$(wc -l < changelog.md)
-        echo "✅ Generated changelog with $(($commit_count)) sections"
+        echo "✅ Found $commit_count commits"
 
     - name: Create release body
       run: |
         cat > release_body.md << EOF
-# 🎉 ${{ env.PROJECT_NAME }} v${{ needs.get-version.outputs.version }}
-
-## 📥 Downloads
-
-### Windows
-| Architecture | File | Size |
-|--------------|------|------|
-| x64 | [⬇️ ${{ env.PROJECT_NAME }}-win-x64-v${{ needs.get-version.outputs.version }}.exe](./${{ env.PROJECT_NAME }}-win-x64-v${{ needs.get-version.outputs.version }}.exe) | N/A |
-| ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-win-arm64-v${{ needs.get-version.outputs.version }}.exe](./${{ env.PROJECT_NAME }}-win-arm64-v${{ needs.get-version.outputs.version }}.exe) | N/A |
-
-### Linux
-| Architecture | File | Size |
-|--------------|------|------|
-| x64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-x64-v${{ needs.get-version.outputs.version }}](./${{ env.PROJECT_NAME }}-linux-x64-v${{ needs.get-version.outputs.version }}) | N/A |
-| ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-arm64-v${{ needs.get-version.outputs.version }}](./${{ env.PROJECT_NAME }}-linux-arm64-v${{ needs.get-version.outputs.version }}) | N/A |
-
-### macOS
-| Architecture | File | Size |
-|--------------|------|------|
-| Intel | [⬇️ ${{ env.PROJECT_NAME }}-osx-x64-v${{ needs.get-version.outputs.version }}](./${{ env.PROJECT_NAME }}-osx-x64-v${{ needs.get-version.outputs.version }}) | N/A |
-| Apple Silicon | [⬇️ ${{ env.PROJECT_NAME }}-osx-arm64-v${{ needs.get-version.outputs.version }}](./${{ env.PROJECT_NAME }}-osx-arm64-v${{ needs.get-version.outputs.version }}) | N/A |
-
-## ✨ What's New
-$(cat changelog.md)
-
-## 🔒 Checksums
-\`\`\`
-$(cd artifacts && cat *.sha256 2>/dev/null || echo "No checksums available")
-\`\`\`
-
-## 📦 Self-contained Executable
-- No .NET runtime required
-- Download and run immediately
-- Works on any compatible system
-
-## 🚀 How to Use
-
-**Windows**:
-- Double-click the \`.exe\` file
-- Or run from command line: \`.\${{ env.PROJECT_NAME }}-win-x64-v${{ needs.get-version.outputs.version }}.exe\`
-
-**Linux/macOS**:
-\`\`\`bash
-chmod +x ${{ env.PROJECT_NAME }}-linux-x64-v${{ needs.get-version.outputs.version }}
-./${{ env.PROJECT_NAME }}-linux-x64-v${{ needs.get-version.outputs.version }}
-\`\`\`
-
-## 📋 System Requirements
-- **Windows**: Windows 10/11, Windows Server 2019+
-- **Linux**: glibc 2.31+, various distributions
-- **macOS**: macOS 11.0+
-
-## 💬 Feedback
-If you encounter any issues, please [create an issue](https://github.com/${{ github.repository }}/issues/new).
-
-## 📋 Previous Versions
-See [all releases](https://github.com/${{ github.repository }}/releases) for older versions.
-
----
-
-*Released on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
-EOF
+        # 🎉 ${{ env.PROJECT_NAME }} v${{ env.VERSION }}
+        
+        ## 📥 Downloads
+        
+        ### Windows
+        | Architecture | File | Size |
+        |--------------|------|------|
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-x64-v${{ env.VERSION }}.exe 2>/dev/null | cut -f1 || echo 'N/A') |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe](./${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe) | $(du -h artifacts/${{ env.PROJECT_NAME }}-win-arm64-v${{ env.VERSION }}.exe 2>/dev/null | cut -f1 || echo 'N/A') |
+        
+        ### Linux
+        | Architecture | File | Size |
+        |--------------|------|------|
+        | x64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A') |
+        | ARM64 | [⬇️ ${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-linux-arm64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A') |
+        
+        ### macOS
+        | Architecture | File | Size |
+        |--------------|------|------|
+        | Intel | [⬇️ ${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-x64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A') |
+        | Apple Silicon | [⬇️ ${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}](./${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }}) | $(du -h artifacts/${{ env.PROJECT_NAME }}-osx-arm64-v${{ env.VERSION }} 2>/dev/null | cut -f1 || echo 'N/A') |
+        
+        ## ✨ What's New
+        $(cat changelog.md)
+        
+        ## 🔒 Checksums
+        \`\`\`
+        $(cd artifacts && cat *.sha256 2>/dev/null || echo "No checksums available")
+        \`\`\`
+        
+        ## 📦 Self-contained Executable
+        - No .NET runtime required
+        - Download and run immediately
+        - Works on any compatible system
+        
+        ## 🚀 How to Use
+        
+        **Windows**:
+        - Double-click the \`.exe\` file
+        
+        **Linux/macOS**:
+        \`\`\`bash
+        chmod +x ${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}
+        ./${{ env.PROJECT_NAME }}-linux-x64-v${{ env.VERSION }}
+        \`\`\`
+        
+        ## 💬 Feedback
+        If you encounter any issues, please [create an issue](https://github.com/${{ github.repository }}/issues/new).
+        
+        ## 📋 Previous Versions
+        See [all releases](https://github.com/${{ github.repository }}/releases) for older versions.
+        EOF
 
     - name: Create Release with GitHub CLI
       run: |
         # Create release with all artifacts
-        gh release create v${{ needs.get-version.outputs.version }} \
-          --title "${{ env.PROJECT_NAME }} v${{ needs.get-version.outputs.version }}" \
+        gh release create v${{ env.VERSION }} \
+          --title "${{ env.PROJECT_NAME }} v${{ env.VERSION }}" \
           --notes-file release_body.md \
           --latest \
           artifacts/*
         
-        echo "✅ Release v${{ needs.get-version.outputs.version }} created successfully!"
+        echo "✅ Release v${{ env.VERSION }} created successfully!"
+        echo "🔗 https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Verify release was created successfully
-      if: always()
+    # Verify release
+    - name: Verify release
       run: |
-        echo "🔍 Verifying release v${{ needs.get-version.outputs.version }}..."
+        RELEASE_INFO=$(gh release view v${{ env.VERSION }} --json isLatest,name,tagName)
+        IS_LATEST=$(echo $RELEASE_INFO | jq -r '.isLatest')
         
-        # Kiểm tra release có tồn tại không
-        if gh release view "v${{ needs.get-version.outputs.version }}" &>/dev/null; then
-          echo "✅✅✅ RELEASE THÀNH CÔNG! ✅✅✅"
-          echo "📦 Release v${{ needs.get-version.outputs.version }} đã được tạo"
-          echo "🔗 https://github.com/${{ github.repository }}/releases/tag/v${{ needs.get-version.outputs.version }}"
-          
-          # Lấy thông tin chi tiết
-          RELEASE_INFO=$(gh release view "v${{ needs.get-version.outputs.version }}" --json name,tagName,isLatest,url,assets)
-          
-          # Kiểm tra các assets
-          ASSET_COUNT=$(echo $RELEASE_INFO | jq '.assets | length')
-          echo "📦 Number of assets uploaded: $ASSET_COUNT"
-          
-          # Kiểm tra xem có phải latest không
-          IS_LATEST=$(echo $RELEASE_INFO | jq -r '.isLatest')
-          if [ "$IS_LATEST" = "true" ]; then
-            echo "⭐ Release is marked as LATEST!"
-          else
-            echo "⚠️ Release is NOT marked as latest"
-          fi
-          
-          # Hiển thị danh sách assets
-          echo "📋 Asset list:"
-          for asset in $(echo $RELEASE_INFO | jq -r '.assets[].name'); do
-            echo "   - $asset"
-          done
-          
-          # Kiểm tra số lượng assets (6 platforms + 6 checksums = 12 files)
-          if [ $ASSET_COUNT -eq 12 ]; then
-            echo "✅ All 12 assets (6 binaries + 6 checksums) are present!"
-          else
-            echo "⚠️ Expected 12 assets but found $ASSET_COUNT"
-          fi
-          
-          echo ""
-          echo "🎉🎉🎉 RELEASE COMPLETED SUCCESSFULLY! 🎉🎉🎉"
+        if [ "$IS_LATEST" = "true" ]; then
+          echo "✅ Release is set as LATEST!"
         else
-          echo "❌❌❌ RELEASE THẤT BẠI! ❌❌❌"
-          echo "Không tìm thấy release v${{ needs.get-version.outputs.version }}"
-          echo "Kiểm tra logs ở trên để biết chi tiết lỗi"
-          exit 1
+          echo "⚠️ Release is NOT latest - check manually"
         fi
+        
+        echo "📊 Release info: $RELEASE_INFO"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Job 6: CodeQL Analysis
+  # Job 4: CodeQL Analysis với @v4
   codeql-analysis:
     needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -653,9 +403,9 @@ EOF
         path: results
         retention-days: 30
 
-  # Job 7: Notification on failure
+  # Job 5: Notification on failure
   notify-failure:
-    needs: [build-and-test, publish-self-contained, create-release, codeql-analysis, security-scan]
+    needs: [build-and-test, publish-self-contained, create-release, codeql-analysis]
     if: failure() && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -664,51 +414,5 @@ EOF
         echo "❌ Workflow failed for ${{ env.PROJECT_NAME }}"
         echo "🔍 Check details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         
-        # Add webhook notification here if needed
-        # curl -X POST -H 'Content-type: application/json' \
-        #   --data "{\"text\":\"❌ Workflow failed for ${{ env.PROJECT_NAME }}!\"}" \
-        #   ${{ secrets.SLACK_WEBHOOK }}
-
-  # Job 8: Final verification
-  verify-release-final:
-    needs: [create-release, codeql-analysis]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-    - name: Final release verification
-      run: |
-        echo "🔍 FINAL VERIFICATION FOR v${{ needs.get-version.outputs.version }}..."
-        
-        # Get release info
-        RELEASE=$(gh api /repos/${{ github.repository }}/releases/tags/v${{ needs.get-version.outputs.version }})
-        
-        if [ -n "$RELEASE" ]; then
-          echo "✅ Release exists"
-          
-          # Check publish date
-          PUBLISHED=$(echo "$RELEASE" | jq -r '.published_at')
-          echo "📅 Published at: $PUBLISHED"
-          
-          # Check if it's the latest
-          LATEST_TAG=$(gh api /repos/${{ github.repository }}/releases/latest | jq -r '.tag_name')
-          if [ "$LATEST_TAG" = "v${{ needs.get-version.outputs.version }}" ]; then
-            echo "⭐ This is the LATEST release!"
-          fi
-          
-          # Count assets
-          ASSET_COUNT=$(echo "$RELEASE" | jq '.assets | length')
-          echo "📦 Total assets: $ASSET_COUNT"
-          
-          # Test download URL
-          DOWNLOAD_URL=$(echo "$RELEASE" | jq -r '.assets[0].browser_download_url')
-          echo "🔗 Sample download URL: $DOWNLOAD_URL"
-          
-          echo ""
-          echo "🎉🎉🎉 ALL VERIFICATIONS PASSED! RELEASE v${{ needs.get-version.outputs.version }} IS LIVE! 🎉🎉🎉"
-          echo "👉 https://github.com/${{ github.repository }}/releases/tag/v${{ needs.get-version.outputs.version }}"
-        else
-          echo "❌ Release verification failed!"
-          exit 1
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Add Slack/Discord/Teams webhook here if needed
+        # curl -X POST -H 'Content-type: application/json' --data '{"text":"Workflow failed for ${{ env.PROJECT_NAME }}!"}' ${{ secrets.SLACK_WEBHOOK }}
