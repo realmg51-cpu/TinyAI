@@ -55,7 +55,7 @@ jobs:
 
     # Upload test results
     - name: Upload test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-results-${{ matrix.configuration }}
@@ -181,7 +181,7 @@ jobs:
         ls -la
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}
         path: ${{ env.OUTPUT_DIR }}/${{ matrix.runtime }}/${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-v${{ env.VERSION }}*
@@ -397,7 +397,7 @@ jobs:
 
     - name: Upload CodeQL results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: codeql-results
         path: results
