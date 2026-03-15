@@ -36,7 +36,7 @@ jobs:
 
     # Caching NuGet packages
     - name: Cache NuGet packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.fsproj') }}
@@ -98,7 +98,7 @@ jobs:
 
     # Cache cho từng runtime
     - name: Cache NuGet packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-${{ matrix.runtime }}-nuget-${{ hashFiles('**/*.csproj') }}
