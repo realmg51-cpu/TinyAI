@@ -20,9 +20,9 @@ namespace TinyAI
         // Main chat logic with if-else conditions
         public static void Logic()
         {
-            bool isRunning = true;  // Control the chat loop
+            bool run = true;  // Control the chat loop
             
-            while (isRunning)
+            while (run)
             {
                 // Get user input
                 Console.Write("You: ");
